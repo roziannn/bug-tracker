@@ -1,10 +1,12 @@
 "use client";
 
-import { Building2, ShieldAlert, Users } from "lucide-react";
+import Link from "next/link";
+import { Building2, Settings2, ShieldAlert, UserPlus, Users } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { issues, picOptions, priorityVariant, teamMetrics } from "@/features/bug-tracker/data/bug-tracker-data";
@@ -22,11 +24,24 @@ export function TeamsPage() {
       eyebrow="People & ownership"
       title="Teams"
       toolbar={
-        <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold tracking-tight">Team workload overview</h2>
-          <p className="text-sm text-muted-foreground">
-            Lihat ownership squad, jumlah issue aktif, dan siapa PIC yang paling relevan buat assignment awal.
-          </p>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight">Team workload overview</h2>
+            <p className="text-sm text-muted-foreground">
+              Lihat ownership squad, jumlah issue aktif, dan maintenance group team langsung dari workspace.
+            </p>
+          </div>
+
+          <Button
+            nativeButton={false}
+            render={
+              <Link href="/teams/groups">
+                <Settings2 />
+                Manage group teams
+              </Link>
+            }
+            size="lg"
+          />
         </div>
       }
     >
@@ -61,7 +76,7 @@ export function TeamsPage() {
             <CardHeader>
               <CardTitle>Team capacity</CardTitle>
               <CardDescription>
-                Ringkasan squad, lead, SLA, dan issue aktif yang sedang berjalan.
+                Ringkasan squad, lead, SLA, issue aktif, dan akses cepat untuk tambah member ke team.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -74,6 +89,7 @@ export function TeamsPage() {
                     <TableHead>Open issues</TableHead>
                     <TableHead>Critical</TableHead>
                     <TableHead>SLA</TableHead>
+                    <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -89,6 +105,17 @@ export function TeamsPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>{team.sla}</TableCell>
+                      <TableCell>
+                        <Button
+                          nativeButton={false}
+                          render={<Link href={`/teams/${team.id}/members`} />}
+                          size="sm"
+                          variant="outline"
+                        >
+                          <UserPlus />
+                          Add member
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

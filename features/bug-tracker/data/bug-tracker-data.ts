@@ -76,7 +76,15 @@ export type ProjectMetric = {
   openIssues: number;
   criticalIssues: number;
   nextMilestone: string;
+  description: string;
+  environment: string;
+  repository: string;
+  createdAt: string;
 };
+
+function newId(value: string) {
+  return value;
+}
 
 export const overviewCards: OverviewCard[] = [
   { label: "Open bugs", value: "34", note: "+5 since yesterday", icon: "circle-dot" },
@@ -253,13 +261,6 @@ export const picOptions: PicOption[] = [
   { value: "lm", label: "Laras Mahesa", team: "Core" },
 ];
 
-export const projectOptions: ProjectOption[] = [
-  { value: "bug-tracker-web", label: "Bug Tracker Web", squad: "Frontend" },
-  { value: "triage-hub", label: "Triage Hub", squad: "Core" },
-  { value: "incident-center", label: "Incident Center", squad: "Platform" },
-  { value: "release-ops", label: "Release Ops", squad: "Core" },
-];
-
 export const teamMetrics: TeamMetric[] = [
   {
     id: "frontend",
@@ -290,9 +291,13 @@ export const teamMetrics: TeamMetric[] = [
   },
 ];
 
+export function getTeamById(id: string) {
+  return teamMetrics.find((team) => team.id === id);
+}
+
 export const projectMetrics: ProjectMetric[] = [
   {
-    id: "bug-tracker-web",
+    id: newId("3f2504e0-4f89-41d3-9a0c-0305e82c3301"),
     name: "Bug Tracker Web",
     team: "Frontend",
     owner: "Raka Aditya",
@@ -300,9 +305,13 @@ export const projectMetrics: ProjectMetric[] = [
     openIssues: 9,
     criticalIssues: 1,
     nextMilestone: "UI stabilization - Apr 18",
+    description: "Frontend application for triage, issue reporting, and engineering quality workflows.",
+    environment: "Production",
+    repository: "github.com/company/bug-tracker-web",
+    createdAt: "2026-03-14",
   },
   {
-    id: "triage-hub",
+    id: newId("7c9e6679-7425-40de-944b-e07fc1f90ae7"),
     name: "Triage Hub",
     team: "Core",
     owner: "Dina Nanda",
@@ -310,9 +319,13 @@ export const projectMetrics: ProjectMetric[] = [
     openIssues: 6,
     criticalIssues: 0,
     nextMilestone: "Queue automation - Apr 21",
+    description: "Internal orchestration service for triage queueing, routing rules, and assignment logic.",
+    environment: "Staging",
+    repository: "github.com/company/triage-hub",
+    createdAt: "2026-02-28",
   },
   {
-    id: "incident-center",
+    id: newId("550e8400-e29b-41d4-a716-446655440000"),
     name: "Incident Center",
     team: "Platform",
     owner: "Mira Indah",
@@ -320,9 +333,13 @@ export const projectMetrics: ProjectMetric[] = [
     openIssues: 8,
     criticalIssues: 2,
     nextMilestone: "Alert routing revamp - Apr 16",
+    description: "Platform console used to monitor incident escalation, alerting, and rollback coordination.",
+    environment: "Production",
+    repository: "github.com/company/incident-center",
+    createdAt: "2026-01-22",
   },
   {
-    id: "release-ops",
+    id: newId("6ba7b814-9dad-11d1-80b4-00c04fd430c8"),
     name: "Release Ops",
     team: "Core",
     owner: "Laras Mahesa",
@@ -330,8 +347,22 @@ export const projectMetrics: ProjectMetric[] = [
     openIssues: 5,
     criticalIssues: 0,
     nextMilestone: "Rollback policy review - Apr 24",
+    description: "Operational workspace for release approvals, deployment visibility, and rollback governance.",
+    environment: "Staging",
+    repository: "github.com/company/release-ops",
+    createdAt: "2026-02-10",
   },
 ];
+
+export const projectOptions: ProjectOption[] = projectMetrics.map((project) => ({
+  value: project.id,
+  label: project.name,
+  squad: project.team,
+}));
+
+export function getProjectById(id: string) {
+  return projectMetrics.find((project) => project.id === id);
+}
 
 export function priorityVariant(
   priority: Priority

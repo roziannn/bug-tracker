@@ -1,16 +1,26 @@
 "use client";
 
-import { FolderKanban, ShieldAlert, Target } from "lucide-react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { FolderKanban, Plus, ShieldAlert, Target } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   projectMetrics,
   projectOptions,
   projectStatusVariant,
 } from "@/features/bug-tracker/data/bug-tracker-data";
+
+const PAGE_SIZE = 4;
+
+function truncateProjectDescription(value: string, maxLength = 30) {
+  if (value.length <= maxLength) return value;
+  return `${value.slice(0, maxLength)}...`;
+}
 
 const projectHighlights = [
   {
@@ -34,17 +44,43 @@ const projectHighlights = [
 ] as const;
 
 export function ProjectsPage() {
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.max(1, Math.ceil(projectMetrics.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedProjects = useMemo(
+    () =>
+      projectMetrics.slice(
+        (currentPage - 1) * PAGE_SIZE,
+        currentPage * PAGE_SIZE
+      ),
+    [currentPage]
+  );
+
   return (
     <AppShell
       activeNav="projects"
       eyebrow="Project routing"
       title="Projects"
       toolbar={
-        <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold tracking-tight">Project health and ownership</h2>
-          <p className="text-sm text-muted-foreground">
-            Kelola daftar project, owner, milestone, dan issue pressure per product area.
-          </p>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight">Project health and ownership</h2>
+            <p className="text-sm text-muted-foreground">
+              Kelola daftar project, owner, milestone, dan issue pressure per product area.
+            </p>
+          </div>
+
+          <Button
+            nativeButton={false}
+            render={
+              <Link href="/projects/create">
+                <Plus />
+                Create project
+              </Link>
+            }
+            size="lg"
+          />
         </div>
       }
     >
@@ -66,9 +102,10 @@ export function ProjectsPage() {
                     </span>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{item.note}</p>
-                </CardContent>
+                <CardFooter className="justify-between">
+                  <Badge variant="secondary">Portfolio</Badge>
+                  <span className="text-xs text-muted-foreground">{item.note}</span>
+                </CardFooter>
               </Card>
             );
           })}
@@ -81,7 +118,7 @@ export function ProjectsPage() {
               Daftar project aktif dengan status, owner, milestone, dan tekanan issue saat ini.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -92,67 +129,82 @@ export function ProjectsPage() {
                   <TableHead>Open issues</TableHead>
                   <TableHead>Critical</TableHead>
                   <TableHead>Next milestone</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {projectMetrics.map((project) => (
-                  <TableRow key={project.id}>
-                    <TableCell className="font-medium">{project.name}</TableCell>
-                    <TableCell>{project.team}</TableCell>
-                    <TableCell>{project.owner}</TableCell>
-                    <TableCell>
-                      <Badge variant={projectStatusVariant(project.status)}>{project.status}</Badge>
+                {paginatedProjects.length ? (
+                  paginatedProjects.map((project) => (
+                    <TableRow key={project.id}>
+                      <TableCell className="align-top">
+                        <div className="max-w-xl space-y-1">
+                          <p className="font-medium">{project.name}</p>
+                          <p className="max-w-xl text-sm text-muted-foreground">
+                            {truncateProjectDescription(project.description)}
+                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="min-w-28 align-top">{project.team}</TableCell>
+                      <TableCell className="min-w-36 align-top">{project.owner}</TableCell>
+                      <TableCell className="min-w-28 align-top">
+                        <Badge variant={projectStatusVariant(project.status)}>{project.status}</Badge>
+                      </TableCell>
+                      <TableCell className="align-top">{project.openIssues}</TableCell>
+                      <TableCell className="align-top">
+                        <Badge variant={project.criticalIssues > 0 ? "destructive" : "secondary"}>
+                          {project.criticalIssues}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="min-w-40 align-top">{project.nextMilestone}</TableCell>
+                      <TableCell className="align-top">
+                        <Button
+                          nativeButton={false}
+                          render={<Link href={`/projects/${project.id}`} />}
+                          size="sm"
+                          variant="outline"
+                        >
+                          Show project
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
+                      No projects found.
                     </TableCell>
-                    <TableCell>{project.openIssues}</TableCell>
-                    <TableCell>
-                      <Badge variant={project.criticalIssues > 0 ? "destructive" : "secondary"}>
-                        {project.criticalIssues}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{project.nextMilestone}</TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
+
+            <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Showing {paginatedProjects.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}-
+                {Math.min(currentPage * PAGE_SIZE, projectMetrics.length)} of {projectMetrics.length} projects
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  disabled={currentPage === 1}
+                  onClick={() => setPage((value) => Math.max(1, value - 1))}
+                  variant="outline"
+                >
+                  Previous
+                </Button>
+                <Badge variant="outline">
+                  Page {currentPage} / {totalPages}
+                </Badge>
+                <Button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+                  variant="outline"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
-
-        <div className="grid gap-4 lg:grid-cols-2">
-          {projectMetrics.map((project) => (
-            <Card key={project.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <CardTitle>{project.name}</CardTitle>
-                    <CardDescription>
-                      Owned by {project.owner} · {project.team}
-                    </CardDescription>
-                  </div>
-                  <Badge variant={projectStatusVariant(project.status)}>{project.status}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="rounded-xl bg-muted/30 p-3">
-                    <p className="text-xs text-muted-foreground">Open issues</p>
-                    <p className="mt-1 text-2xl font-semibold">{project.openIssues}</p>
-                  </div>
-                  <div className="rounded-xl bg-muted/30 p-3">
-                    <p className="text-xs text-muted-foreground">Critical</p>
-                    <p className="mt-1 text-2xl font-semibold">{project.criticalIssues}</p>
-                  </div>
-                  <div className="rounded-xl bg-muted/30 p-3">
-                    <p className="text-xs text-muted-foreground">Next target</p>
-                    <p className="mt-1 text-sm font-medium">{project.nextMilestone}</p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Project ini dipakai sebagai opsi di form create issue, jadi tim bisa langsung route bug ke product area yang tepat.
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       </div>
     </AppShell>
   );

@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/sidebar";
 
 type AppShellProps = {
-  activeNav: "overview" | "issues" | "kanban" | "teams" | "projects";
+  activeNav: "overview" | "issues" | "kanban" | "teams" | "projects" | "settings";
   eyebrow: string;
   title: string;
   toolbar?: ReactNode;
@@ -51,7 +51,7 @@ const navigation = [
   { id: "triage", label: "Triage Queue", href: "/", icon: ShieldAlert, badge: "7" },
   { id: "teams", label: "Teams", href: "/teams", icon: Users },
   { id: "projects", label: "Projects", href: "/projects", icon: FolderOpenDot },
-  { id: "settings", label: "Settings", href: "/", icon: Settings },
+  { id: "settings", label: "Settings", href: "/settings/menu", icon: Settings },
 ] as const;
 
 export function AppShell({
