@@ -1,0 +1,159 @@
+"use client";
+
+import type { ReactNode } from "react";
+import Link from "next/link";
+import {
+  CircleDot,
+  FolderKanban,
+  FolderOpenDot,
+  Gauge,
+  KanbanSquare,
+  Plus,
+  Settings,
+  ShieldAlert,
+  Users,
+} from "lucide-react";
+
+import { NotificationDropdown } from "@/components/shared/navigation/notification-dropdown";
+import { ThemeToggle } from "@/components/shared/theme/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+
+type AppShellProps = {
+  activeNav: "overview" | "issues" | "kanban" | "teams" | "projects";
+  eyebrow: string;
+  title: string;
+  toolbar?: ReactNode;
+  children: ReactNode;
+};
+
+const navigation = [
+  { id: "overview", label: "Overview", href: "/", icon: Gauge },
+  { id: "issues", label: "All Issues", href: "/issues", icon: CircleDot, badge: "34" },
+  { id: "kanban", label: "Kanban", href: "/kanban", icon: KanbanSquare },
+  { id: "triage", label: "Triage Queue", href: "/", icon: ShieldAlert, badge: "7" },
+  { id: "teams", label: "Teams", href: "/teams", icon: Users },
+  { id: "projects", label: "Projects", href: "/projects", icon: FolderOpenDot },
+  { id: "settings", label: "Settings", href: "/", icon: Settings },
+] as const;
+
+export function AppShell({
+  activeNav,
+  eyebrow,
+  title,
+  toolbar,
+  children,
+}: AppShellProps) {
+  return (
+    <SidebarProvider defaultOpen>
+      <Sidebar collapsible="icon" variant="inset">
+        <SidebarHeader className="gap-3 p-3">
+          <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/50 px-3 py-3">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
+              <FolderKanban className="size-5" />
+            </div>
+            <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+              <p className="truncate text-sm font-semibold">Bug Tracker</p>
+              <p className="truncate text-xs text-sidebar-foreground/70">
+                Engineering workspace
+              </p>
+            </div>
+          </div>
+        </SidebarHeader>
+
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navigation.map((item) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <SidebarMenuItem key={item.label}>
+                      <SidebarMenuButton
+                        isActive={item.id === activeNav}
+                        render={<Link href={item.href} />}
+                        tooltip={item.label}
+                      >
+                        <Icon />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                      {"badge" in item && item.badge ? (
+                        <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                      ) : null}
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter className="p-3">
+          <Card size="sm" className="border-0 bg-sidebar-accent/60 shadow-none">
+            <CardHeader className="px-3">
+              <CardTitle className="text-sm">Release health</CardTitle>
+              <CardDescription>Version `v2.8.1` is stable in staging.</CardDescription>
+            </CardHeader>
+          </Card>
+        </SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
+
+      <SidebarInset>
+        <div className="flex min-h-svh flex-col">
+          <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
+            <div className="flex flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <SidebarTrigger />
+                  <div>
+                    <p className="text-sm text-muted-foreground">{eyebrow}</p>
+                    <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <ThemeToggle />
+                  <NotificationDropdown />
+                  <Button
+                    nativeButton={false}
+                    render={
+                      <Link href="/issues/create">
+                        <Plus />
+                        Create issue
+                      </Link>
+                    }
+                    size="lg"
+                  />
+                </div>
+              </div>
+
+              {toolbar}
+            </div>
+          </header>
+
+          <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
