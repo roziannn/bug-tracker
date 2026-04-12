@@ -1,12 +1,14 @@
 "use client";
 
 import { CircleDot, GitBranch, ListFilter, Search, ShieldAlert, Sparkles } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, Cell, Label, Pie, PieChart, XAxis, YAxis } from "recharts";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
@@ -26,6 +28,108 @@ const iconMap = {
   "git-branch": GitBranch,
   sparkles: Sparkles,
 } as const;
+
+const teamChartConfig = {
+  total: {
+    label: "Issues",
+    color: "var(--color-chart-1)",
+  },
+  Frontend: {
+    label: "Frontend",
+    color: "var(--color-chart-1)",
+  },
+  Platform: {
+    label: "Platform",
+    color: "var(--color-chart-2)",
+  },
+  Core: {
+    label: "Core",
+    color: "var(--color-chart-3)",
+  },
+} satisfies ChartConfig;
+
+const priorityChartConfig = {
+  count: {
+    label: "Issues",
+  },
+  Critical: {
+    label: "Critical",
+    color: "var(--destructive)",
+  },
+  High: {
+    label: "High",
+    color: "var(--color-chart-4)",
+  },
+  Medium: {
+    label: "Medium",
+    color: "var(--color-chart-1)",
+  },
+  Low: {
+    label: "Low",
+    color: "var(--color-chart-2)",
+  },
+} satisfies ChartConfig;
+
+const statusChartConfig = {
+  total: {
+    label: "Issues",
+    color: "var(--color-chart-5)",
+  },
+  Backlog: {
+    label: "Backlog",
+    color: "var(--color-chart-5)",
+  },
+  Ready: {
+    label: "Ready",
+    color: "var(--color-chart-2)",
+  },
+  Investigating: {
+    label: "Investigating",
+    color: "var(--color-chart-4)",
+  },
+  "In review": {
+    label: "In review",
+    color: "var(--color-chart-1)",
+  },
+  Done: {
+    label: "Done",
+    color: "var(--color-chart-3)",
+  },
+} satisfies ChartConfig;
+
+const priorityOrder = ["Critical", "High", "Medium", "Low"] as const;
+const statusOrder = ["Backlog", "Ready", "Investigating", "In review", "Done"] as const;
+
+const issuesByTeam = Object.entries(
+  issues.reduce<Record<string, number>>((accumulator, issue) => {
+    accumulator[issue.team] = (accumulator[issue.team] ?? 0) + 1;
+    return accumulator;
+  }, {})
+)
+  .map(([team, total]) => ({
+    team,
+    total,
+    fill: `var(--color-${team})`,
+  }))
+  .sort((left, right) => right.total - left.total);
+
+const issuesByPriority = priorityOrder.map((priority) => ({
+  priority,
+  count: issues.filter((issue) => issue.priority === priority).length,
+  fill: `var(--color-${priority})`,
+}));
+
+const issuesByStatus = statusOrder.map((status) => ({
+  status,
+  total: issues.filter((issue) => issue.status === status).length,
+  fill: `var(--color-${status})`,
+}));
+
+const totalIssues = issues.length;
+const urgentIssues = issues.filter((issue) => issue.priority === "Critical" || issue.priority === "High").length;
+const busiestTeam = issuesByTeam[0];
+const urgentWatchlist = issues.filter((issue) => issue.priority === "Critical" || issue.priority === "High");
+const busiestStatus = [...issuesByStatus].sort((left, right) => right.total - left.total)[0];
 
 function DashboardToolbar() {
   return (
@@ -117,12 +221,151 @@ export function DashboardOverview() {
         </div>
 
         <TabsContent value="active">
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid gap-4 xl:grid-cols-3">
             <Card>
               <CardHeader>
-                <CardTitle>Priority issues</CardTitle>
+                <CardTitle>Issue by team</CardTitle>
                 <CardDescription>
-                  Current sprint focus across frontend, platform, and core squads.
+                  Current workload split across squads for the active sprint board.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer className="h-[220px] w-full" config={teamChartConfig}>
+                  <BarChart accessibilityLayer data={issuesByTeam} margin={{ top: 12, right: 8, left: 8, bottom: 0 }}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis axisLine={false} dataKey="team" tickLine={false} tickMargin={10} />
+                    <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={28} />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent formatter={(value) => [`${value} issues`, "Open load"]} hideLabel />}
+                    />
+                    <Bar dataKey="total" radius={10}>
+                      {issuesByTeam.map((entry) => (
+                        <Cell key={entry.team} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              </CardContent>
+              <CardFooter className="justify-between gap-3 text-sm text-muted-foreground">
+                <span>{busiestTeam.team} has the heaviest queue right now.</span>
+                <Badge variant="secondary">{busiestTeam.total} issues</Badge>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Priority breakdown</CardTitle>
+                <CardDescription>
+                  Donut view to spot how much of the board needs urgent attention.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer className="mx-auto h-[220px] w-full max-w-[240px]" config={priorityChartConfig}>
+                  <PieChart accessibilityLayer>
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          formatter={(value, name) => [`${value} issues`, priorityChartConfig[String(name)]?.label ?? String(name)]}
+                          hideIndicator
+                        />
+                      }
+                    />
+                    <Pie data={issuesByPriority} dataKey="count" innerRadius={54} outerRadius={82} nameKey="priority" strokeWidth={6}>
+                      {issuesByPriority.map((entry) => (
+                        <Cell key={entry.priority} fill={entry.fill} />
+                      ))}
+                      <Label
+                        content={({ viewBox }) => {
+                          if (!viewBox || !("cx" in viewBox) || !("cy" in viewBox)) {
+                            return null;
+                          }
+
+                          return (
+                            <text
+                              fill="currentColor"
+                              textAnchor="middle"
+                              x={viewBox.cx}
+                              y={(viewBox.cy ?? 0) - 10}
+                            >
+                              <tspan
+                                fill="var(--foreground)"
+                                fontSize="34"
+                                fontWeight="700"
+                                x={viewBox.cx}
+                                y={(viewBox.cy ?? 0) - 10}
+                              >
+                                {totalIssues}
+                              </tspan>
+                              <tspan
+                                fill="var(--muted-foreground)"
+                                fontSize="13"
+                                fontWeight="500"
+                                x={viewBox.cx}
+                                y={(viewBox.cy ?? 0) + 10}
+                              >
+                                total issues
+                              </tspan>
+                            </text>
+                          );
+                        }}
+                      />
+                    </Pie>
+                    <ChartLegend content={<ChartLegendContent nameKey="priority" className="flex-wrap gap-3 pt-6" />} />
+                  </PieChart>
+                </ChartContainer>
+              </CardContent>
+              <CardFooter className="justify-between gap-3 text-sm text-muted-foreground">
+                <span>{urgentIssues} items are still in Critical or High priority.</span>
+                <Badge variant="outline">Needs daily triage</Badge>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Issue by status</CardTitle>
+                <CardDescription>
+                  Snapshot of how the board is distributed from backlog to done.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer className="h-[220px] w-full" config={statusChartConfig}>
+                  <BarChart accessibilityLayer data={issuesByStatus} layout="vertical" margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
+                    <CartesianGrid horizontal={false} />
+                    <XAxis allowDecimals={false} axisLine={false} tickLine={false} type="number" hide />
+                    <YAxis
+                      axisLine={false}
+                      dataKey="status"
+                      tickLine={false}
+                      tickMargin={10}
+                      type="category"
+                      width={84}
+                    />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent formatter={(value) => [`${value} issues`, "Status load"]} hideLabel />}
+                    />
+                    <Bar dataKey="total" layout="vertical" radius={10}>
+                      {issuesByStatus.map((entry) => (
+                        <Cell key={entry.status} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              </CardContent>
+              <CardFooter className="justify-between gap-3 text-sm text-muted-foreground">
+                <span>{busiestStatus.status} currently holds the most items.</span>
+                <Badge variant="secondary">{busiestStatus.total} issues</Badge>
+              </CardFooter>
+            </Card>
+          </div>
+
+          <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <Card>
+              <CardHeader>
+                <CardTitle>Issue watchlist</CardTitle>
+                <CardDescription>
+                  Focus list for urgent items only, without medium and low noise.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -137,7 +380,7 @@ export function DashboardOverview() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {issues.map((issue) => (
+                    {urgentWatchlist.map((issue) => (
                       <TableRow key={issue.id}>
                         <TableCell>
                           <div className="space-y-1">
