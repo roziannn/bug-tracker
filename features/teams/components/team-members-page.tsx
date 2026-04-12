@@ -21,9 +21,7 @@ export function TeamMembersPage({ id }: { id: string }) {
         <Card>
           <CardHeader>
             <CardTitle>Team not found</CardTitle>
-            <CardDescription>
-              Team dengan id `{id}` belum tersedia di data bug tracker saat ini.
-            </CardDescription>
+            <CardDescription>Team dengan id `{id}` belum tersedia di data bug tracker saat ini.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button nativeButton={false} render={<Link href="/teams" />} variant="outline">
@@ -46,9 +44,7 @@ export function TeamMembersPage({ id }: { id: string }) {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-lg font-semibold tracking-tight">Add people to team</h2>
-            <p className="text-sm text-muted-foreground">
-              Penambahan orang dipisah dari maintenance group team supaya role dan membership lebih rapi.
-            </p>
+            <p className="text-sm text-muted-foreground">Penambahan orang dipisah dari maintenance group team supaya role dan membership lebih rapi.</p>
           </div>
           <Button nativeButton={false} render={<Link href="/teams/groups" />} variant="outline">
             Manage group teams
@@ -60,9 +56,7 @@ export function TeamMembersPage({ id }: { id: string }) {
         <Card>
           <CardHeader>
             <CardTitle>Add member</CardTitle>
-            <CardDescription>
-              Tambahkan anggota baru ke team `{team.name}` tanpa mengubah struktur group team lainnya.
-            </CardDescription>
+            <CardDescription>Tambahkan anggota baru ke team `{team.name}` tanpa mengubah struktur group team lainnya.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
@@ -96,9 +90,7 @@ export function TeamMembersPage({ id }: { id: string }) {
         <Card>
           <CardHeader>
             <CardTitle>Current members</CardTitle>
-            <CardDescription>
-              Daftar member yang saat ini terhubung ke team {team.name}.
-            </CardDescription>
+            <CardDescription>Daftar member yang saat ini terhubung ke team {team.name}.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3">
             {members.map((member) => (

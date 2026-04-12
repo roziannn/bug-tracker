@@ -7,6 +7,7 @@ import {
   FolderKanban,
   FolderOpenDot,
   Gauge,
+  History,
   KanbanSquare,
   Plus,
   Settings,
@@ -16,8 +17,8 @@ import {
 
 import { NotificationDropdown } from "@/components/shared/navigation/notification-dropdown";
 import { ThemeToggle } from "@/components/shared/theme/theme-toggle";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Sidebar,
   SidebarContent,
@@ -37,7 +38,7 @@ import {
 } from "@/components/ui/sidebar";
 
 type AppShellProps = {
-  activeNav: "overview" | "issues" | "kanban" | "teams" | "projects" | "settings";
+  activeNav: "overview" | "issues" | "kanban" | "teams" | "projects" | "changelog" | "settings";
   eyebrow: string;
   title: string;
   toolbar?: ReactNode;
@@ -51,6 +52,7 @@ const navigation = [
   { id: "triage", label: "Triage Queue", href: "/", icon: ShieldAlert, badge: "7" },
   { id: "teams", label: "Teams", href: "/teams", icon: Users },
   { id: "projects", label: "Projects", href: "/projects", icon: FolderOpenDot },
+  { id: "changelog", label: "Changelog", href: "/changelog", icon: History },
   { id: "settings", label: "Settings", href: "/settings/menu", icon: Settings },
 ] as const;
 
@@ -108,12 +110,20 @@ export function AppShell({
         </SidebarContent>
 
         <SidebarFooter className="p-3">
-          <Card size="sm" className="border-0 bg-sidebar-accent/60 shadow-none">
-            <CardHeader className="px-3">
-              <CardTitle className="text-sm">Release health</CardTitle>
-              <CardDescription>Version `v2.8.1` is stable in staging.</CardDescription>
-            </CardHeader>
-          </Card>
+          <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/60 px-3 py-3">
+            <Avatar>
+              <AvatarFallback>RA</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+              <p className="truncate text-sm font-medium">Raka Aditya</p>
+              <p className="truncate text-xs text-sidebar-foreground/70">
+                Engineering Lead
+              </p>
+              <p className="truncate text-xs text-sidebar-foreground/60">
+                raka@bugtracker.app
+              </p>
+            </div>
+          </div>
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
@@ -126,7 +136,6 @@ export function AppShell({
                 <div className="flex items-center gap-3">
                   <SidebarTrigger />
                   <div>
-                    <p className="text-sm text-muted-foreground">{eyebrow}</p>
                     <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
                   </div>
                 </div>

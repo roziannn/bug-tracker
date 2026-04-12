@@ -1,10 +1,5 @@
 export type Priority = "Critical" | "High" | "Medium" | "Low";
-export type IssueStatus =
-  | "Backlog"
-  | "Ready"
-  | "Investigating"
-  | "In review"
-  | "Done";
+export type IssueStatus = "Backlog" | "Ready" | "Investigating" | "In review" | "Done";
 
 export type IssueRecord = {
   id: string;
@@ -16,17 +11,20 @@ export type IssueRecord = {
   label: string | "None";
   createdAt: string;
   summary?: string;
+  comments?: {
+    id: string;
+    author: string;
+    avatar?: string;
+    text: string;
+    createdAt: string;
+  }[];
 };
 
 export type OverviewCard = {
   label: string;
   value: string;
   note: string;
-  icon:
-    | "circle-dot"
-    | "shield-alert"
-    | "git-branch"
-    | "sparkles";
+  icon: "circle-dot" | "shield-alert" | "git-branch" | "sparkles";
 };
 
 export type KanbanColumn = {
@@ -35,13 +33,7 @@ export type KanbanColumn = {
   description: string;
 };
 
-export type IssueClassification =
-  | "UI Bug"
-  | "Functional"
-  | "Performance"
-  | "Security"
-  | "Data Integrity"
-  | "Integration";
+export type IssueClassification = "UI Bug" | "Functional" | "Performance" | "Security" | "Data Integrity" | "Integration";
 
 export type CriticalityTier = "Tier 1 - Critical" | "Tier 2 - Major" | "Tier 3 - Moderate" | "Tier 4 - Minor";
 
@@ -82,6 +74,15 @@ export type ProjectMetric = {
   createdAt: string;
 };
 
+export type ChangelogEntry = {
+  version: string;
+  releasedOn: string;
+  headline: string;
+  summary: string;
+  highlights: string[];
+  category: "Feature" | "Improvement" | "Fix";
+};
+
 function newId(value: string) {
   return value;
 }
@@ -104,6 +105,26 @@ export const issues: IssueRecord[] = [
     label: "Upload",
     createdAt: "2026-04-10",
     summary: "Attachment upload path fails when preview generation exceeds memory threshold.",
+    comments: [
+      {
+        id: "c1",
+        author: "Mira Indah",
+        text: "I've reproduced this on the staging environment. It seems to happen specifically with PNG files over 12MB.",
+        createdAt: "2026-04-10",
+      },
+      {
+        id: "c2",
+        author: "Raka Aditya",
+        text: "Thanks Mira. I'll check the memory limit in the cloud function configuration.",
+        createdAt: "2026-04-11",
+      },
+      {
+        id: "c3",
+        author: "Alif Latif",
+        text: "Added a PR to increase the memory allocation and added a client-side check for file size.",
+        createdAt: "2026-04-12",
+      },
+    ],
   },
   {
     id: "BUG-214",
@@ -236,21 +257,9 @@ export const kanbanColumns: KanbanColumn[] = [
   { id: "Done", title: "Done", description: "Resolved items ready for release notes." },
 ];
 
-export const issueClassifications: IssueClassification[] = [
-  "UI Bug",
-  "Functional",
-  "Performance",
-  "Security",
-  "Data Integrity",
-  "Integration",
-];
+export const issueClassifications: IssueClassification[] = ["UI Bug", "Functional", "Performance", "Security", "Data Integrity", "Integration"];
 
-export const criticalityTiers: CriticalityTier[] = [
-  "Tier 1 - Critical",
-  "Tier 2 - Major",
-  "Tier 3 - Moderate",
-  "Tier 4 - Minor",
-];
+export const criticalityTiers: CriticalityTier[] = ["Tier 1 - Critical", "Tier 2 - Major", "Tier 3 - Moderate", "Tier 4 - Minor"];
 
 export const picOptions: PicOption[] = [
   { value: "ra", label: "Raka Aditya", team: "Frontend" },
@@ -354,6 +363,33 @@ export const projectMetrics: ProjectMetric[] = [
   },
 ];
 
+export const changelogEntries: ChangelogEntry[] = [
+  {
+    version: "v2.8.1",
+    releasedOn: "2026-04-11",
+    headline: "Management flows expanded across workspace",
+    summary: "Projects, teams, settings, and issue creation now have dedicated management flows inside the bug tracker.",
+    highlights: ["Added create and detail flows for projects.", "Added team group maintenance and per-team member management pages.", "Expanded settings pages for menu, permission, and environment configuration."],
+    category: "Feature",
+  },
+  {
+    version: "v2.8.0",
+    releasedOn: "2026-04-09",
+    headline: "Kanban workflow and navigation polish",
+    summary: "The kanban board was cleaned up to focus on drag-and-drop flow while rules moved into a dialog.",
+    highlights: ["Made the kanban board full-width.", "Moved board rules into a modal dialog trigger.", "Improved navigation consistency for major workspace sections."],
+    category: "Improvement",
+  },
+  {
+    version: "v2.7.9",
+    releasedOn: "2026-04-04",
+    headline: "Stability and release visibility updates",
+    summary: "Recent fixes improved release summaries, timestamp consistency, and issue reporting clarity.",
+    highlights: ["Improved webhook retry timestamp consistency.", "Refined release health summaries in the workspace.", "Improved issue data presentation across tracking screens."],
+    category: "Fix",
+  },
+];
+
 export const projectOptions: ProjectOption[] = projectMetrics.map((project) => ({
   value: project.id,
   label: project.name,
@@ -364,27 +400,38 @@ export function getProjectById(id: string) {
   return projectMetrics.find((project) => project.id === id);
 }
 
-export function priorityVariant(
-  priority: Priority
-): "default" | "secondary" | "destructive" | "outline" {
+export function getIssueById(id: string) {
+  return issues.find((issue) => issue.id === id);
+}
+
+export function getRelativeTime(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+  if (diffInDays === 0) return "today";
+  if (diffInDays === 1) return "yesterday";
+  if (diffInDays < 7) return `${diffInDays} days ago`;
+  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
+  return `${Math.floor(diffInDays / 30)} months ago`;
+}
+
+export function priorityVariant(priority: Priority): "default" | "secondary" | "destructive" | "outline" {
   if (priority === "Critical") return "destructive";
   if (priority === "High") return "default";
   if (priority === "Medium") return "secondary";
   return "outline";
 }
 
-export function statusVariant(
-  status: IssueStatus
-): "default" | "secondary" | "outline" | "ghost" {
+export function statusVariant(status: IssueStatus): "default" | "secondary" | "outline" | "ghost" {
   if (status === "Ready") return "default";
   if (status === "In review") return "secondary";
   if (status === "Investigating") return "outline";
   return "ghost";
 }
 
-export function projectStatusVariant(
-  status: ProjectMetric["status"]
-): "default" | "secondary" | "destructive" {
+export function projectStatusVariant(status: ProjectMetric["status"]): "default" | "secondary" | "destructive" {
   if (status === "Healthy") return "secondary";
   if (status === "At risk") return "default";
   return "destructive";

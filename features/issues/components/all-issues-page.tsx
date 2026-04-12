@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Download, ListFilter, Search, ShieldAlert, TimerReset, TriangleAlert } from "lucide-react";
 
@@ -187,7 +188,7 @@ function IssuesToolbar({
 export function AllIssuesPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all");
-  const [labelFilter, setLabelFilter] = useState<LabelFilter>("None");
+  const [labelFilter, setLabelFilter] = useState<LabelFilter>("all");
   const [page, setPage] = useState(1);
 
   const filteredIssues = useMemo(() => {
@@ -306,11 +307,21 @@ export function AllIssuesPage() {
                       <TableCell className="text-muted-foreground">
                         {formatDate(issue.createdAt)}
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          nativeButton={false}
+                          render={<Link href={`/issues/${issue.id}`} />}
+                          size="sm"
+                          variant="outline"
+                        >
+                          Show issue
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
                       No issues match the current filters.
                     </TableCell>
                   </TableRow>
