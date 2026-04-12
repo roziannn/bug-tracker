@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { FileCode2, FileImage, FileText, Film } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
@@ -10,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { getIssueById, getRelativeTime, priorityVariant, statusVariant } from "@/features/bug-tracker/data/bug-tracker-data";
+import { appToast } from "@/lib/app-toast";
 
 const issueEvidence = {
   "BUG-218": [
@@ -72,6 +74,33 @@ const issueEvidence = {
 export function IssueDetailPage({ id }: { id: string }) {
   const issue = getIssueById(id);
   const evidenceItems = issueEvidence[issue?.id as keyof typeof issueEvidence] ?? issueEvidence.default;
+  const [draftComment, setDraftComment] = useState("");
+  const [comments, setComments] = useState(() => issue?.comments ?? []);
+
+  function handlePostComment() {
+    if (!draftComment.trim()) {
+      appToast.error({
+        title: "Comment is empty",
+        description: "Write a quick update or note before posting it to the discussion thread.",
+      });
+      return;
+    }
+
+    setComments((current) => [
+      ...current,
+      {
+        id: `comment-${Date.now()}`,
+        author: "You",
+        text: draftComment.trim(),
+        createdAt: new Date().toISOString(),
+      },
+    ]);
+    setDraftComment("");
+    appToast.success({
+      title: "Comment posted",
+      description: "Your update has been added to the issue discussion.",
+    });
+  }
 
   if (!issue) {
     return (
@@ -166,7 +195,7 @@ export function IssueDetailPage({ id }: { id: string }) {
             </CardHeader>
             <CardContent className="space-y-8">
               <div className="space-y-6">
-                {issue.comments?.map((comment) => (
+                {comments.map((comment) => (
                   <div key={comment.id} className="flex gap-4">
                     <Avatar className="size-9">
                       <AvatarImage src={comment.avatar} />
@@ -187,7 +216,7 @@ export function IssueDetailPage({ id }: { id: string }) {
                   </div>
                 ))}
 
-                {(!issue.comments || issue.comments.length === 0) && <div className="py-6 text-center text-sm text-muted-foreground">No discussion yet. Be the first to comment.</div>}
+                {comments.length === 0 && <div className="py-6 text-center text-sm text-muted-foreground">No discussion yet. Be the first to comment.</div>}
               </div>
 
               <div className="flex gap-4 pt-4">
@@ -195,9 +224,14 @@ export function IssueDetailPage({ id }: { id: string }) {
                   <AvatarFallback>ME</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-3">
-                  <Textarea placeholder="Add a comment..." className="min-h-25 resize-none" />
+                  <Textarea
+                    className="min-h-25 resize-none"
+                    onChange={(event) => setDraftComment(event.target.value)}
+                    placeholder="Add a comment..."
+                    value={draftComment}
+                  />
                   <div className="flex justify-end">
-                    <Button>Post comment</Button>
+                    <Button onClick={handlePostComment}>Post comment</Button>
                   </div>
                 </div>
               </div>

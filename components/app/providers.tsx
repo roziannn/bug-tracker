@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { ThemeProvider } from "next-themes";
+import { AppToaster } from "@/components/ui/app-toaster";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export function Providers({ children }: { children: ReactNode }) {
       enableSystem
     >
       {children}
+      <AppToaster />
     </ThemeProvider>
   );
 }

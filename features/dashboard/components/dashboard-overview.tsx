@@ -15,12 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  issues,
-  overviewCards,
-  priorityVariant,
-  statusVariant,
-} from "@/features/bug-tracker/data/bug-tracker-data";
+import { issues, overviewCards, priorityVariant, statusVariant } from "@/features/bug-tracker/data/bug-tracker-data";
 
 const iconMap = {
   "circle-dot": CircleDot,
@@ -99,12 +94,13 @@ const statusChartConfig = {
 
 const priorityOrder = ["Critical", "High", "Medium", "Low"] as const;
 const statusOrder = ["Backlog", "Ready", "Investigating", "In review", "Done"] as const;
+type PriorityKey = (typeof priorityOrder)[number];
 
 const issuesByTeam = Object.entries(
   issues.reduce<Record<string, number>>((accumulator, issue) => {
     accumulator[issue.team] = (accumulator[issue.team] ?? 0) + 1;
     return accumulator;
-  }, {})
+  }, {}),
 )
   .map(([team, total]) => ({
     team,
@@ -131,16 +127,16 @@ const busiestTeam = issuesByTeam[0];
 const urgentWatchlist = issues.filter((issue) => issue.priority === "Critical" || issue.priority === "High");
 const busiestStatus = [...issuesByStatus].sort((left, right) => right.total - left.total)[0];
 
+function getPriorityLabel(priority: PriorityKey) {
+  return priorityChartConfig[priority].label ?? priority;
+}
+
 function DashboardToolbar() {
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex w-full max-w-xl items-center gap-2 rounded-xl border bg-card px-3">
         <Search className="size-4 text-muted-foreground" />
-        <Input
-          aria-label="Search issues"
-          className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-          placeholder="Search issues, tags, reporters, or release versions..."
-        />
+        <Input aria-label="Search issues" className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0" placeholder="Search issues, tags, reporters, or release versions..." />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -180,12 +176,7 @@ function DashboardToolbar() {
 
 export function DashboardOverview() {
   return (
-    <AppShell
-      activeNav="overview"
-      eyebrow="Sprint board"
-      title="Product Quality Dashboard"
-      toolbar={<DashboardToolbar />}
-    >
+    <AppShell activeNav="overview" eyebrow="Sprint board" title="Product Quality Dashboard" toolbar={<DashboardToolbar />}>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {overviewCards.map((card) => {
           const Icon = iconMap[card.icon];
@@ -209,9 +200,7 @@ export function DashboardOverview() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-lg font-semibold tracking-tight">Issue flow</h2>
-            <p className="text-sm text-muted-foreground">
-              Shared components are already wired for cards, tables, dialogs, filters, and navigation.
-            </p>
+            <p className="text-sm text-muted-foreground">Shared components are already wired for cards, tables, dialogs, filters, and navigation.</p>
           </div>
           <TabsList variant="line">
             <TabsTrigger value="active">Active sprint</TabsTrigger>
@@ -225,20 +214,15 @@ export function DashboardOverview() {
             <Card>
               <CardHeader>
                 <CardTitle>Issue by team</CardTitle>
-                <CardDescription>
-                  Current workload split across squads for the active sprint board.
-                </CardDescription>
+                <CardDescription>Current workload split across squads for the active sprint board.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer className="h-[220px] w-full" config={teamChartConfig}>
+                <ChartContainer className="h-55 w-full" config={teamChartConfig}>
                   <BarChart accessibilityLayer data={issuesByTeam} margin={{ top: 12, right: 8, left: 8, bottom: 0 }}>
                     <CartesianGrid vertical={false} />
                     <XAxis axisLine={false} dataKey="team" tickLine={false} tickMargin={10} />
                     <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={28} />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent formatter={(value) => [`${value} issues`, "Open load"]} hideLabel />}
-                    />
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent formatter={(value) => [`${value} issues`, "Open load"]} hideLabel />} />
                     <Bar dataKey="total" radius={10}>
                       {issuesByTeam.map((entry) => (
                         <Cell key={entry.team} fill={entry.fill} />
@@ -256,17 +240,18 @@ export function DashboardOverview() {
             <Card>
               <CardHeader>
                 <CardTitle>Priority breakdown</CardTitle>
-                <CardDescription>
-                  Donut view to spot how much of the board needs urgent attention.
-                </CardDescription>
+                <CardDescription>Donut view to spot how much of the board needs urgent attention.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer className="mx-auto h-[220px] w-full max-w-[240px]" config={priorityChartConfig}>
+                <ChartContainer className="mx-auto h-55 w-full max-w-60" config={priorityChartConfig}>
                   <PieChart accessibilityLayer>
                     <ChartTooltip
                       content={
                         <ChartTooltipContent
-                          formatter={(value, name) => [`${value} issues`, priorityChartConfig[String(name)]?.label ?? String(name)]}
+                          formatter={(value, name) => {
+                            const priorityName = String(name) as PriorityKey;
+                            return [`${value} issues`, getPriorityLabel(priorityName)];
+                          }}
                           hideIndicator
                         />
                       }
@@ -282,28 +267,11 @@ export function DashboardOverview() {
                           }
 
                           return (
-                            <text
-                              fill="currentColor"
-                              textAnchor="middle"
-                              x={viewBox.cx}
-                              y={(viewBox.cy ?? 0) - 10}
-                            >
-                              <tspan
-                                fill="var(--foreground)"
-                                fontSize="34"
-                                fontWeight="700"
-                                x={viewBox.cx}
-                                y={(viewBox.cy ?? 0) - 10}
-                              >
+                            <text fill="currentColor" textAnchor="middle" x={viewBox.cx} y={(viewBox.cy ?? 0) - 10}>
+                              <tspan fill="var(--foreground)" fontSize="34" fontWeight="700" x={viewBox.cx} y={(viewBox.cy ?? 0) - 10}>
                                 {totalIssues}
                               </tspan>
-                              <tspan
-                                fill="var(--muted-foreground)"
-                                fontSize="13"
-                                fontWeight="500"
-                                x={viewBox.cx}
-                                y={(viewBox.cy ?? 0) + 10}
-                              >
+                              <tspan fill="var(--muted-foreground)" fontSize="13" fontWeight="500" x={viewBox.cx} y={(viewBox.cy ?? 0) + 10}>
                                 total issues
                               </tspan>
                             </text>
@@ -324,28 +292,16 @@ export function DashboardOverview() {
             <Card>
               <CardHeader>
                 <CardTitle>Issue by status</CardTitle>
-                <CardDescription>
-                  Snapshot of how the board is distributed from backlog to done.
-                </CardDescription>
+                <CardDescription>Snapshot of how the board is distributed from backlog to done.</CardDescription>
               </CardHeader>
               <CardContent>
-                <ChartContainer className="h-[220px] w-full" config={statusChartConfig}>
+                <ChartContainer className="h-55 w-full" config={statusChartConfig}>
                   <BarChart accessibilityLayer data={issuesByStatus} layout="vertical" margin={{ top: 4, right: 8, left: 8, bottom: 4 }}>
                     <CartesianGrid horizontal={false} />
                     <XAxis allowDecimals={false} axisLine={false} tickLine={false} type="number" hide />
-                    <YAxis
-                      axisLine={false}
-                      dataKey="status"
-                      tickLine={false}
-                      tickMargin={10}
-                      type="category"
-                      width={84}
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent formatter={(value) => [`${value} issues`, "Status load"]} hideLabel />}
-                    />
-                    <Bar dataKey="total" layout="vertical" radius={10}>
+                    <YAxis axisLine={false} dataKey="status" tickLine={false} tickMargin={10} type="category" width={84} />
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent formatter={(value) => [`${value} issues`, "Status load"]} hideLabel />} />
+                    <Bar dataKey="total" radius={10}>
                       {issuesByStatus.map((entry) => (
                         <Cell key={entry.status} fill={entry.fill} />
                       ))}
@@ -364,9 +320,7 @@ export function DashboardOverview() {
             <Card>
               <CardHeader>
                 <CardTitle>Issue watchlist</CardTitle>
-                <CardDescription>
-                  Focus list for urgent items only, without medium and low noise.
-                </CardDescription>
+                <CardDescription>Focus list for urgent items only, without medium and low noise.</CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -410,9 +364,7 @@ export function DashboardOverview() {
             <Card>
               <CardHeader>
                 <CardTitle>Triage notes</CardTitle>
-                <CardDescription>
-                  Example panel for reusable cards, badges, inputs, and textarea fields.
-                </CardDescription>
+                <CardDescription>Example panel for reusable cards, badges, inputs, and textarea fields.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="rounded-xl border bg-muted/30 p-3">
@@ -420,17 +372,12 @@ export function DashboardOverview() {
                     <p className="font-medium">Crash cluster spike</p>
                     <Badge variant="destructive">Critical</Badge>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Android attachment uploads increased error volume by 38% after the latest rollout.
-                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">Android attachment uploads increased error volume by 38% after the latest rollout.</p>
                 </div>
                 <Separator />
                 <div className="space-y-2">
                   <p className="text-sm font-medium">Quick handoff</p>
-                  <Textarea
-                    defaultValue="Need reproduction steps from QA and API logs from the upload gateway before the daily sync."
-                    rows={6}
-                  />
+                  <Textarea defaultValue="Need reproduction steps from QA and API logs from the upload gateway before the daily sync." rows={6} />
                 </div>
               </CardContent>
               <CardFooter className="justify-between">
@@ -445,9 +392,7 @@ export function DashboardOverview() {
           <Card>
             <CardHeader>
               <CardTitle>Triage queue</CardTitle>
-              <CardDescription>
-                Use this tab as the starting point for backlog review or a dedicated `/triage` page.
-              </CardDescription>
+              <CardDescription>Use this tab as the starting point for backlog review or a dedicated `/triage` page.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               <Badge>7 unassigned</Badge>
@@ -461,22 +406,16 @@ export function DashboardOverview() {
           <Card>
             <CardHeader>
               <CardTitle>Recently resolved</CardTitle>
-              <CardDescription>
-                Shared UI is ready for velocity reports, release summaries, or changelog views.
-              </CardDescription>
+              <CardDescription>Shared UI is ready for velocity reports, release summaries, or changelog views.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="rounded-xl border p-4">
                 <p className="font-medium">BUG-196 fixed in `v2.8.0`</p>
-                <p className="text-sm text-muted-foreground">
-                  Session timeout banner now respects retry state and no longer overlaps the editor toolbar.
-                </p>
+                <p className="text-sm text-muted-foreground">Session timeout banner now respects retry state and no longer overlaps the editor toolbar.</p>
               </div>
               <div className="rounded-xl border p-4">
                 <p className="font-medium">BUG-188 fixed in `v2.7.9`</p>
-                <p className="text-sm text-muted-foreground">
-                  Webhook delivery retries now show consistent timestamps across UTC and local user settings.
-                </p>
+                <p className="text-sm text-muted-foreground">Webhook delivery retries now show consistent timestamps across UTC and local user settings.</p>
               </div>
             </CardContent>
           </Card>

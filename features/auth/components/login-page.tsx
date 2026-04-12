@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   Bug,
@@ -25,6 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { appToast } from "@/lib/app-toast";
 
 const highlights = [
   "Kanban triage board with drag and drop workflow",
@@ -33,6 +36,24 @@ const highlights = [
 ];
 
 export function LoginPage() {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    appToast.success({
+      title: "Login successful",
+      description: email ? `Welcome back, ${email}. Redirecting to your workspace.` : "Redirecting to your workspace.",
+    });
+
+    startTransition(() => {
+      router.push("/");
+    });
+  }
+
   return (
     <div className="relative min-h-svh overflow-x-hidden overflow-y-auto lg:h-svh lg:overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,color-mix(in_oklab,var(--primary)_14%,transparent),transparent_32%),radial-gradient(circle_at_bottom_right,color-mix(in_oklab,var(--accent)_30%,transparent),transparent_28%)]" />
@@ -146,11 +167,13 @@ export function LoginPage() {
                   <Separator className="flex-1" />
                 </div>
 
-                <form className="space-y-3">
+                <form className="space-y-3" onSubmit={handleSubmit}>
                   <div className="grid gap-2">
                     <Label htmlFor="email">Work email</Label>
                     <Input
                       id="email"
+                      onChange={(event) => setEmail(event.target.value)}
+                      value={email}
                       type="email"
                       placeholder="you@company.com"
                     />
@@ -168,12 +191,14 @@ export function LoginPage() {
                     </div>
                     <Input
                       id="password"
+                      onChange={(event) => setPassword(event.target.value)}
+                      value={password}
                       type="password"
                       placeholder="Enter your password"
                     />
                   </div>
 
-                  <Button className="w-full" size="lg">
+                  <Button className="w-full" disabled={isPending} size="lg">
                     Sign in to dashboard
                     <ArrowRight />
                   </Button>

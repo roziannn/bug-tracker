@@ -2,16 +2,20 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   CircleDot,
+  ChevronsUpDown,
   FolderKanban,
   FolderOpenDot,
   Gauge,
   History,
   KanbanSquare,
+  LogOut,
   Plus,
   Settings,
   ShieldAlert,
+  UserCircle2,
   Users,
 } from "lucide-react";
 
@@ -19,6 +23,13 @@ import { NotificationDropdown } from "@/components/shared/navigation/notificatio
 import { ThemeToggle } from "@/components/shared/theme/theme-toggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -36,10 +47,11 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { appToast } from "@/lib/app-toast";
 
 type AppShellProps = {
   activeNav: "overview" | "issues" | "kanban" | "teams" | "projects" | "changelog" | "settings";
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   toolbar?: ReactNode;
   children: ReactNode;
@@ -58,11 +70,20 @@ const navigation = [
 
 export function AppShell({
   activeNav,
-  eyebrow,
   title,
   toolbar,
   children,
 }: AppShellProps) {
+  const router = useRouter();
+
+  function handleLogout() {
+    appToast.success({
+      title: "Logged out successfully",
+      description: "You have been signed out from the bug tracker workspace.",
+    });
+    router.push("/login");
+  }
+
   return (
     <SidebarProvider defaultOpen>
       <Sidebar collapsible="icon" variant="inset">
@@ -110,20 +131,47 @@ export function AppShell({
         </SidebarContent>
 
         <SidebarFooter className="p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
-          <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/60 px-3 py-3 transition-all group-data-[collapsible=icon]:size-14 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-2xl group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0">
-            <Avatar>
-              <AvatarFallback>RA</AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-              <p className="truncate text-sm font-medium">Raka Aditya</p>
-              <p className="truncate text-xs text-sidebar-foreground/70">
-                Engineering Lead
-              </p>
-              <p className="truncate text-xs text-sidebar-foreground/60">
-                raka@bugtracker.app
-              </p>
-            </div>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <button className="flex w-full items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/60 px-3 py-3 text-left transition-all hover:bg-sidebar-accent group-data-[collapsible=icon]:size-14 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-2xl group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0">
+                  <Avatar>
+                    <AvatarFallback>RA</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+                    <p className="truncate text-sm font-medium">Raka Aditya</p>
+                    <p className="truncate text-xs text-sidebar-foreground/70">
+                      Engineering Lead
+                    </p>
+                    <p className="truncate text-xs text-sidebar-foreground/60">
+                      raka@bugtracker.app
+                    </p>
+                  </div>
+                  <ChevronsUpDown className="size-4 text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden" />
+                </button>
+              }
+            />
+            <DropdownMenuContent
+              align="end"
+              className="w-56"
+              side="top"
+              sideOffset={8}
+            >
+              <div className="px-2 py-1.5">
+                <p className="text-sm font-medium text-foreground">Raka Aditya</p>
+                <p className="text-xs text-muted-foreground">raka@bugtracker.app</p>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem render={<Link href="/profile" />}>
+                <UserCircle2 />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} variant="destructive">
+                <LogOut />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
@@ -136,9 +184,6 @@ export function AppShell({
                 <div className="flex items-center gap-3">
                   <SidebarTrigger />
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                      {eyebrow}
-                    </p>
                     <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
                   </div>
                 </div>
