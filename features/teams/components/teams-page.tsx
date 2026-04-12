@@ -17,6 +17,11 @@ const teamHighlights = [
   { label: "Critical owners", value: "2", icon: ShieldAlert, note: "Two squads are handling critical tickets this week." },
 ] as const;
 
+const picDirectoryByTeam = teamMetrics.map((team) => ({
+  team: team.name,
+  members: picOptions.filter((person) => person.team === team.name),
+}));
+
 export function TeamsPage() {
   return (
     <AppShell
@@ -130,28 +135,25 @@ export function TeamsPage() {
                 Kandidat owner awal issue berdasarkan squad dan distribusi task yang ada.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {picOptions.map((person) => {
-                const openOwnedIssues = issues.filter((issue) => issue.assignee.toLowerCase() === person.value).length;
-
+            <CardContent className="space-y-2">
+              {picDirectoryByTeam.map((group) => {
                 return (
-                  <div key={person.value} className="flex items-center justify-between gap-3 rounded-xl border p-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarFallback>
-                          {person.label
-                            .split(" ")
-                            .slice(0, 2)
-                            .map((part) => part[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{person.label}</p>
-                        <p className="text-sm text-muted-foreground">{person.team}</p>
-                      </div>
+                  <div
+                    key={group.team}
+                    className="grid gap-2 rounded-xl border px-3 py-3 md:grid-cols-[88px_minmax(0,1fr)] md:items-start"
+                  >
+                    <div className="pt-0.5">
+                      <p className="text-sm font-semibold">{group.team}</p>
                     </div>
-                    <Badge variant="outline">{openOwnedIssues} issues</Badge>
+
+                    <div className="text-sm leading-6 text-muted-foreground">
+                      {group.members.map((person, index) => (
+                        <span key={person.value}>
+                          <span className="font-medium text-foreground">{person.label}</span>
+                          {index < group.members.length - 1 ? ", " : ""}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 );
               })}

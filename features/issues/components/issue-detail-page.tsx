@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FileCode2, FileImage, FileText, Film } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -10,8 +11,67 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { getIssueById, getRelativeTime, priorityVariant, statusVariant } from "@/features/bug-tracker/data/bug-tracker-data";
 
+const issueEvidence = {
+  "BUG-218": [
+    {
+      name: "upload-crash-repro.mp4",
+      type: "Video reproduction",
+      size: "18.4 MB",
+      note: "QA capture showing app crash after uploading a 12.6 MB PNG file.",
+      icon: Film,
+    },
+    {
+      name: "memory-usage-spike.png",
+      type: "Screenshot",
+      size: "2.1 MB",
+      note: "Heap usage peaks right before preview generation fails.",
+      icon: FileImage,
+    },
+    {
+      name: "cloud-function-error.log",
+      type: "Runtime log",
+      size: "184 KB",
+      note: "Stack trace from upload worker with memory limit warning.",
+      icon: FileCode2,
+    },
+  ],
+  "BUG-214": [
+    {
+      name: "offline-reconnect-flow.mp4",
+      type: "Video reproduction",
+      size: "9.8 MB",
+      note: "Queued comment gets submitted twice after reconnect event fires.",
+      icon: Film,
+    },
+    {
+      name: "request-timeline.txt",
+      type: "Request trace",
+      size: "54 KB",
+      note: "Shows duplicated replay payloads in websocket recovery path.",
+      icon: FileText,
+    },
+  ],
+  default: [
+    {
+      name: "bug-evidence.png",
+      type: "Screenshot",
+      size: "1.4 MB",
+      note: "Captured UI state from the latest reported reproduction.",
+      icon: FileImage,
+    },
+    {
+      name: "console-output.log",
+      type: "Runtime log",
+      size: "92 KB",
+      note: "Relevant console and app trace collected during triage.",
+      icon: FileCode2,
+    },
+  ],
+} as const;
+
 export function IssueDetailPage({ id }: { id: string }) {
   const issue = getIssueById(id);
+  const evidenceItems = issueEvidence[issue?.id as keyof typeof issueEvidence] ?? issueEvidence.default;
 
   if (!issue) {
     return (
@@ -146,6 +206,38 @@ export function IssueDetailPage({ id }: { id: string }) {
         </div>
 
         <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Evidence</CardTitle>
+              <CardDescription>Attached files and captures related to this bug report.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {evidenceItems.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <div key={item.name} className="rounded-xl border bg-card p-3">
+                    <div className="flex items-start gap-3">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                        <Icon className="size-4" />
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">{item.type}</p>
+                          </div>
+                          <Badge variant="outline">{item.size}</Badge>
+                        </div>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{item.note}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>History</CardTitle>

@@ -66,9 +66,9 @@ export function AppShell({
   return (
     <SidebarProvider defaultOpen>
       <Sidebar collapsible="icon" variant="inset">
-        <SidebarHeader className="gap-3 p-3">
-          <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/50 px-3 py-3">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
+        <SidebarHeader className="gap-3 p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
+          <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/50 px-3 py-3 transition-all group-data-[collapsible=icon]:size-14 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-2xl group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground transition-all group-data-[collapsible=icon]:size-9">
               <FolderKanban className="size-5" />
             </div>
             <div className="min-w-0 group-data-[collapsible=icon]:hidden">
@@ -109,8 +109,8 @@ export function AppShell({
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="p-3">
-          <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/60 px-3 py-3">
+        <SidebarFooter className="p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
+          <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/60 px-3 py-3 transition-all group-data-[collapsible=icon]:size-14 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-2xl group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0">
             <Avatar>
               <AvatarFallback>RA</AvatarFallback>
             </Avatar>
@@ -136,6 +136,9 @@ export function AppShell({
                 <div className="flex items-center gap-3">
                   <SidebarTrigger />
                   <div>
+                    <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                      {eyebrow}
+                    </p>
                     <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
                   </div>
                 </div>
