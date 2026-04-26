@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const settingsLinks = [
   { href: "/settings/menu", label: "Menu" },
-  { href: "/settings/permission", label: "Permission" },
+  { href: "/settings/permission", label: "Role" },
   { href: "/settings/environment", label: "Environment" },
 ] as const;
 

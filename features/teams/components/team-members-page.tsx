@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { UserPlus } from "lucide-react";
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Pencil, Save, UserPlus } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
@@ -10,10 +11,45 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getTeamById, picOptions } from "@/features/bug-tracker/data/bug-tracker-data";
+
+const PAGE_SIZE = 4;
+const roleOptions = ["Admin", "Lead", "Engineer", "QA"] as const;
+const accessLevelOptions = ["member", "lead", "observer"] as const;
+
+type TeamMemberRecord = {
+  id: string;
+  name: string;
+  email: string;
+  team: string;
+  role: (typeof roleOptions)[number];
+  accessLevel: (typeof accessLevelOptions)[number];
+  isActive: "active" | "inactive";
+};
 
 export function TeamMembersPage({ id }: { id: string }) {
   const team = getTeamById(id);
+  const [page, setPage] = useState(1);
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
+  const [memberName, setMemberName] = useState("");
+  const [memberEmail, setMemberEmail] = useState("");
+  const [memberRole, setMemberRole] = useState<(typeof roleOptions)[number]>("Engineer");
+  const [accessLevel, setAccessLevel] = useState<(typeof accessLevelOptions)[number]>("member");
+  const [isActive, setIsActive] = useState<"active" | "inactive">("active");
+  const [members, setMembers] = useState<TeamMemberRecord[]>(() =>
+    picOptions
+      .filter((person) => person.team === (team?.name ?? ""))
+      .map((person, index) => ({
+        id: person.value,
+        name: person.label,
+        email: `${person.label.toLowerCase().replaceAll(" ", ".")}@company.com`,
+        team: person.team,
+        role: index === 0 ? "Lead" : "Engineer",
+        accessLevel: index === 0 ? "lead" : "member",
+        isActive: "active",
+      })),
+  );
 
   if (!team) {
     return (
@@ -33,7 +69,67 @@ export function TeamMembersPage({ id }: { id: string }) {
     );
   }
 
-  const members = picOptions.filter((person) => person.team === team.name);
+  const totalPages = Math.max(1, Math.ceil(members.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedMembers = members.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const isEditing = editingMemberId !== null;
+
+  function resetForm() {
+    setEditingMemberId(null);
+    setMemberName("");
+    setMemberEmail("");
+    setMemberRole("Engineer");
+    setAccessLevel("member");
+    setIsActive("active");
+  }
+
+  function handleSubmit() {
+    if (!memberName.trim() || !memberEmail.trim()) {
+      return;
+    }
+
+    if (isEditing) {
+      setMembers((current) =>
+        current.map((member) =>
+          member.id === editingMemberId
+            ? {
+                ...member,
+                name: memberName.trim(),
+                email: memberEmail.trim(),
+                role: memberRole,
+                accessLevel,
+                isActive,
+              }
+            : member,
+        ),
+      );
+      resetForm();
+      return;
+    }
+
+    setMembers((current) => [
+      ...current,
+      {
+        id: `${memberName.toLowerCase().replaceAll(/\s+/g, "-")}-${current.length + 1}`,
+        name: memberName.trim(),
+        email: memberEmail.trim(),
+        team: team.name,
+        role: memberRole,
+        accessLevel,
+        isActive: "active",
+      },
+    ]);
+    resetForm();
+  }
+
+  function handleEdit(member: TeamMemberRecord) {
+    setEditingMemberId(member.id);
+    setMemberName(member.name);
+    setMemberEmail(member.email);
+    setMemberRole(member.role);
+    setAccessLevel(member.accessLevel);
+    setIsActive(member.isActive);
+  }
 
   return (
     <AppShell
@@ -55,35 +151,75 @@ export function TeamMembersPage({ id }: { id: string }) {
       <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
         <Card>
           <CardHeader>
-            <CardTitle>Add member</CardTitle>
-            <CardDescription>Tambahkan anggota baru ke team `{team.name}` tanpa mengubah struktur group team lainnya.</CardDescription>
+            <CardTitle>{isEditing ? "Edit member" : "Add member"}</CardTitle>
+            <CardDescription>
+              {isEditing ? `Update data anggota team \`${team.name}\` tanpa mengubah struktur group team lainnya.` : `Tambahkan anggota baru ke team \`${team.name}\` tanpa mengubah struktur group team lainnya.`}
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="member-name">Full name</Label>
-              <Input id="member-name" placeholder="Contoh: Nabila Putri" />
+              <Input id="member-name" value={memberName} onChange={(event) => setMemberName(event.target.value)} placeholder="Contoh: Nabila Putri" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="member-email">Email</Label>
+              <Input id="member-email" type="email" value={memberEmail} onChange={(event) => setMemberEmail(event.target.value)} placeholder="Contoh: nabila@company.com" />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="member-role">Role</Label>
-              <Input id="member-role" placeholder="Contoh: Frontend Engineer" />
+              <Select value={memberRole} onValueChange={(value) => setMemberRole(value as (typeof roleOptions)[number])}>
+                <SelectTrigger className="w-full" id="member-role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {roleOptions.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {role}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
               <Label>Access level</Label>
-              <Select defaultValue="member">
+              <Select value={accessLevel} onValueChange={(value) => setAccessLevel(value as (typeof accessLevelOptions)[number])}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="member">Member</SelectItem>
-                  <SelectItem value="lead">Lead</SelectItem>
-                  <SelectItem value="observer">Observer</SelectItem>
+                  {accessLevelOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option === "member" ? "Member" : option === "lead" ? "Lead" : "Observer"}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            <Button>
-              <UserPlus />
-              Add to {team.name}
-            </Button>
+            {isEditing ? (
+              <div className="grid gap-2">
+                <Label>Is active</Label>
+                <Select value={isActive} onValueChange={(value) => setIsActive(value as "active" | "inactive")}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
+            <div className="flex gap-2">
+              <Button onClick={handleSubmit}>
+                {isEditing ? <Save /> : <UserPlus />}
+                {isEditing ? "Save member" : `Add to ${team.name}`}
+              </Button>
+              {isEditing ? (
+                <Button onClick={resetForm} variant="outline">
+                  Cancel
+                </Button>
+              ) : null}
+            </div>
           </CardContent>
         </Card>
 
@@ -92,16 +228,60 @@ export function TeamMembersPage({ id }: { id: string }) {
             <CardTitle>Current members</CardTitle>
             <CardDescription>Daftar member yang saat ini terhubung ke team {team.name}.</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-3">
-            {members.map((member) => (
-              <div key={member.value} className="flex items-center justify-between gap-3 rounded-xl border p-4">
-                <div>
-                  <p className="font-medium">{member.label}</p>
-                  <p className="text-sm text-muted-foreground">{member.team}</p>
-                </div>
-                <Badge variant="outline">PIC</Badge>
+          <CardContent className="space-y-2">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Team</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedMembers.length ? (
+                  paginatedMembers.map((member) => (
+                    <TableRow key={member.id}>
+                      <TableCell className="font-medium">{member.name}</TableCell>
+                      <TableCell className="text-muted-foreground">{member.team}</TableCell>
+                      <TableCell>{member.role}</TableCell>
+                      <TableCell>
+                        <Button onClick={() => handleEdit(member)} variant="outline" size="icon-sm">
+                          <Pencil />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                      No members found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+
+            <div className="flex flex-col gap-3 border-t pt-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Showing {paginatedMembers.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}-{Math.min(currentPage * PAGE_SIZE, members.length)} of {members.length} members
+              </p>
+              <div className="flex items-center gap-2">
+                <Button disabled={currentPage === 1} onClick={() => setPage(1)} variant="outline" size="sm">
+                  <ChevronsLeft />
+                </Button>
+                <Button disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))} variant="outline" size="sm">
+                  <ChevronLeft />
+                </Button>
+                <Badge variant="outline">{currentPage}</Badge>
+                <Button disabled={currentPage === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} variant="outline" size="sm">
+                  <ChevronRight />
+                </Button>
+                <Button disabled={currentPage === totalPages} onClick={() => setPage(totalPages)} variant="outline" size="sm">
+                  <ChevronsRight />
+                </Button>
               </div>
-            ))}
+            </div>
           </CardContent>
         </Card>
       </div>

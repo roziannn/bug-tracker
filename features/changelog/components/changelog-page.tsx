@@ -23,7 +23,7 @@ const changelogStats = [
   },
   {
     label: "Focus areas",
-    value: "Projects, Teams, Settings",
+    value: "Projects and Teams",
     note: "Largest recent surface area of change",
     icon: ShieldAlert,
   },
@@ -47,9 +47,7 @@ export function ChangelogPage() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-lg font-semibold tracking-tight">Product evolution log</h2>
-            <p className="text-sm text-muted-foreground">
-              Track what changed in the bug tracker across features, workflow improvements, and stability updates.
-            </p>
+            <p className="text-sm text-muted-foreground">Track what changed in the bug tracker across features, workflow improvements, and stability updates.</p>
           </div>
           <Badge variant="secondary">Latest: {latestEntry.version}</Badge>
         </div>
@@ -88,9 +86,7 @@ export function ChangelogPage() {
               <div className="space-y-2">
                 <Badge variant={changelogVariant(latestEntry.category)}>{latestEntry.category}</Badge>
                 <CardTitle className="text-2xl">{latestEntry.headline}</CardTitle>
-                <CardDescription className="max-w-3xl text-base">
-                  {latestEntry.summary}
-                </CardDescription>
+                <CardDescription className="max-w-3xl text-base">{latestEntry.summary}</CardDescription>
               </div>
               <div className="rounded-xl border bg-background px-4 py-3">
                 <p className="text-xs text-muted-foreground">Released</p>

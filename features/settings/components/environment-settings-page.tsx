@@ -1,13 +1,34 @@
 "use client";
 
-import { CloudCog, DatabaseZap, ServerCog } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Plus } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SettingsSubnav } from "@/features/settings/components/settings-subnav";
 
-const environments = [
+type EnvironmentRow = {
+  name: string;
+  apiBase: string;
+  database: string;
+  status: "Active" | "Synced" | "Protected";
+};
+
+const initialEnvironments: EnvironmentRow[] = [
   {
     name: "Development",
     apiBase: "http://localhost:3000/api",
@@ -26,9 +47,66 @@ const environments = [
     database: "Primary cluster",
     status: "Protected",
   },
-] as const;
+];
+
+const PAGE_SIZE = 4;
+
+function statusBadgeVariant(status: EnvironmentRow["status"]) {
+  if (status === "Protected") return "destructive";
+  if (status === "Synced") return "secondary";
+  return "default";
+}
 
 export function EnvironmentSettingsPage() {
+  const [environments, setEnvironments] = useState<EnvironmentRow[]>(initialEnvironments);
+  const [page, setPage] = useState(1);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [environmentName, setEnvironmentName] = useState("");
+  const [apiBase, setApiBase] = useState("");
+  const [database, setDatabase] = useState("");
+  const [status, setStatus] = useState<EnvironmentRow["status"]>("Active");
+  const totalPages = Math.max(1, Math.ceil(environments.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedEnvironments = useMemo(
+    () => environments.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [currentPage, environments]
+  );
+
+  function updateEnvironment(index: number, field: keyof EnvironmentRow, value: string) {
+    setEnvironments((current) =>
+      current.map((environment, currentIndex) =>
+        currentIndex === index
+          ? {
+              ...environment,
+              [field]: value,
+            }
+          : environment
+      )
+    );
+  }
+
+  function createEnvironment() {
+    if (!environmentName.trim() || !apiBase.trim() || !database.trim()) {
+      return;
+    }
+
+    setEnvironments((current) => [
+      ...current,
+      {
+        name: environmentName.trim(),
+        apiBase: apiBase.trim(),
+        database: database.trim(),
+        status,
+      },
+    ]);
+
+    setEnvironmentName("");
+    setApiBase("");
+    setDatabase("");
+    setStatus("Active");
+    setIsCreateDialogOpen(false);
+  }
+
   return (
     <AppShell
       activeNav="settings"
@@ -39,96 +117,176 @@ export function EnvironmentSettingsPage() {
           <div>
             <h2 className="text-lg font-semibold tracking-tight">Environment settings</h2>
             <p className="text-sm text-muted-foreground">
-              Lihat environment yang dipakai app, endpoint aktif, dan status koneksi utama.
+              Edit environment app, endpoint API, database profile, dan status koneksi langsung dari tabel.
             </p>
           </div>
           <SettingsSubnav />
         </div>
       }
     >
-      <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <CardDescription>Runtime target</CardDescription>
-                  <CardTitle className="mt-2 text-3xl">Next.js</CardTitle>
-                </div>
-                <CloudCog className="size-5 text-primary" />
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <CardTitle>Environment configuration</CardTitle>
+                <CardDescription>
+                  Semua environment bisa diedit inline tanpa membuka card detail.
+                </CardDescription>
               </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Configuration dipetakan untuk App Router dan deployment modern.</p>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <CardDescription>Service mode</CardDescription>
-                  <CardTitle className="mt-2 text-3xl">3 envs</CardTitle>
-                </div>
-                <ServerCog className="size-5 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Development, staging, dan production sudah terpetakan.</p>
-            </CardContent>
-          </Card>
+              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <DialogTrigger render={<Button />}>
+                  <Plus />
+                  Add Environment
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Add new environment</DialogTitle>
+                    <DialogDescription>
+                      Tambahkan environment baru beserta endpoint API, database profile, dan status awalnya.
+                    </DialogDescription>
+                  </DialogHeader>
 
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <CardDescription>Database profile</CardDescription>
-                  <CardTitle className="mt-2 text-3xl">Postgres</CardTitle>
-                </div>
-                <DatabaseZap className="size-5 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Semua env memakai profile database yang berbeda sesuai kebutuhan.</p>
-            </CardContent>
-          </Card>
-        </div>
+                  <div className="grid gap-4">
+                    <div className="grid gap-2">
+                      <label htmlFor="environment-name" className="text-sm font-medium">
+                        Environment name
+                      </label>
+                      <Input
+                        id="environment-name"
+                        value={environmentName}
+                        onChange={(event) => setEnvironmentName(event.target.value)}
+                        placeholder="Contoh: UAT"
+                      />
+                    </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
-          {environments.map((environment) => (
-            <Card key={environment.name}>
-              <CardHeader>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <CardTitle>{environment.name}</CardTitle>
-                    <CardDescription>{environment.apiBase}</CardDescription>
+                    <div className="grid gap-2">
+                      <label htmlFor="environment-api-base" className="text-sm font-medium">
+                        API Base URL
+                      </label>
+                      <Input
+                        id="environment-api-base"
+                        value={apiBase}
+                        onChange={(event) => setApiBase(event.target.value)}
+                        placeholder="Contoh: https://uat.bugtracker.internal/api"
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <label htmlFor="environment-database" className="text-sm font-medium">
+                        Database
+                      </label>
+                      <Input
+                        id="environment-database"
+                        value={database}
+                        onChange={(event) => setDatabase(event.target.value)}
+                        placeholder="Contoh: Replica Postgres"
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <label className="text-sm font-medium">Status</label>
+                      <Select value={status} onValueChange={(value) => setStatus(value as EnvironmentRow["status"])}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Active">Active</SelectItem>
+                          <SelectItem value="Synced">Synced</SelectItem>
+                          <SelectItem value="Protected">Protected</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <Badge
-                    variant={
-                      environment.status === "Protected"
-                        ? "destructive"
-                        : environment.status === "Synced"
-                          ? "secondary"
-                          : "default"
-                    }
-                  >
-                    {environment.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <div>
-                  <p className="text-xs text-muted-foreground">Database</p>
-                  <p className="font-medium">{environment.database}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Endpoint</p>
-                  <p className="break-all text-sm">{environment.apiBase}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+
+                  <DialogFooter showCloseButton>
+                    <Button onClick={createEnvironment}>
+                      <Plus />
+                      Add environment
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Environment</TableHead>
+                  <TableHead>API Base URL</TableHead>
+                  <TableHead>Database</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedEnvironments.map((environment, index) => {
+                  const absoluteIndex = (currentPage - 1) * PAGE_SIZE + index;
+
+                  return (
+                  <TableRow key={environment.name}>
+                    <TableCell className="font-medium">{environment.name}</TableCell>
+                    <TableCell className="min-w-64">
+                      <Input
+                        value={environment.apiBase}
+                        onChange={(event) => updateEnvironment(absoluteIndex, "apiBase", event.target.value)}
+                      />
+                    </TableCell>
+                    <TableCell className="min-w-52">
+                      <Input
+                        value={environment.database}
+                        onChange={(event) => updateEnvironment(absoluteIndex, "database", event.target.value)}
+                      />
+                    </TableCell>
+                    <TableCell className="min-w-44">
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={environment.status}
+                          onValueChange={(value) => updateEnvironment(absoluteIndex, "status", value)}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Active">Active</SelectItem>
+                            <SelectItem value="Synced">Synced</SelectItem>
+                            <SelectItem value="Protected">Protected</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Badge variant={statusBadgeVariant(environment.status)}>
+                          {environment.status}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+
+            <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Showing {paginatedEnvironments.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}-{Math.min(currentPage * PAGE_SIZE, environments.length)} of {environments.length} environments
+              </p>
+              <div className="flex items-center gap-2">
+                <Button disabled={currentPage === 1} onClick={() => setPage(1)} variant="outline" size="sm">
+                  <ChevronsLeft />
+                </Button>
+                <Button disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))} variant="outline" size="sm">
+                  <ChevronLeft />
+                </Button>
+                <Badge variant="outline">{currentPage}</Badge>
+                <Button disabled={currentPage === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} variant="outline" size="sm">
+                  <ChevronRight />
+                </Button>
+                <Button disabled={currentPage === totalPages} onClick={() => setPage(totalPages)} variant="outline" size="sm">
+                  <ChevronsRight />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </AppShell>
   );

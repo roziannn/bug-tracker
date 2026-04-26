@@ -11,12 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { issues, picOptions, priorityVariant, teamMetrics } from "@/features/bug-tracker/data/bug-tracker-data";
 
-const teamHighlights = [
-  { label: "Active squads", value: "3", icon: Building2, note: "Frontend, Platform, and Core are currently on call." },
-  { label: "Assigned PICs", value: String(picOptions.length), icon: Users, note: "Engineers available for direct issue routing." },
-  { label: "Critical owners", value: "2", icon: ShieldAlert, note: "Two squads are handling critical tickets this week." },
-] as const;
-
 const picDirectoryByTeam = teamMetrics.map((team) => ({
   team: team.name,
   members: picOptions.filter((person) => person.team === team.name),
@@ -32,9 +26,7 @@ export function TeamsPage() {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h2 className="text-lg font-semibold tracking-tight">Team workload overview</h2>
-            <p className="text-sm text-muted-foreground">
-              Lihat ownership squad, jumlah issue aktif, dan maintenance group team langsung dari workspace.
-            </p>
+            <p className="text-sm text-muted-foreground">Lihat ownership squad, jumlah issue aktif, dan maintenance group team langsung dari workspace.</p>
           </div>
 
           <Button
@@ -51,38 +43,11 @@ export function TeamsPage() {
       }
     >
       <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-3">
-          {teamHighlights.map((item) => {
-            const Icon = item.icon;
-
-            return (
-              <Card key={item.label}>
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <CardDescription>{item.label}</CardDescription>
-                      <CardTitle className="mt-2 text-3xl">{item.value}</CardTitle>
-                    </div>
-                    <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Icon className="size-5" />
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{item.note}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
           <Card>
             <CardHeader>
               <CardTitle>Team capacity</CardTitle>
-              <CardDescription>
-                Ringkasan squad, lead, SLA, issue aktif, dan akses cepat untuk tambah member ke team.
-              </CardDescription>
+              <CardDescription>Ringkasan squad, lead, SLA, issue aktif, dan akses cepat untuk tambah member ke team.</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -105,18 +70,11 @@ export function TeamsPage() {
                       <TableCell>{team.members}</TableCell>
                       <TableCell>{team.activeIssues}</TableCell>
                       <TableCell>
-                        <Badge variant={team.criticalOpen > 0 ? "destructive" : "secondary"}>
-                          {team.criticalOpen}
-                        </Badge>
+                        <Badge variant={team.criticalOpen > 0 ? "destructive" : "secondary"}>{team.criticalOpen}</Badge>
                       </TableCell>
                       <TableCell>{team.sla}</TableCell>
                       <TableCell>
-                        <Button
-                          nativeButton={false}
-                          render={<Link href={`/teams/${team.id}/members`} />}
-                          size="sm"
-                          variant="outline"
-                        >
+                        <Button nativeButton={false} render={<Link href={`/teams/${team.id}/members`} />} size="sm" variant="outline">
                           <UserPlus />
                           Add member
                         </Button>
@@ -131,17 +89,12 @@ export function TeamsPage() {
           <Card>
             <CardHeader>
               <CardTitle>PIC directory</CardTitle>
-              <CardDescription>
-                Kandidat owner awal issue berdasarkan squad dan distribusi task yang ada.
-              </CardDescription>
+              <CardDescription>Kandidat owner awal issue berdasarkan squad dan distribusi task yang ada.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               {picDirectoryByTeam.map((group) => {
                 return (
-                  <div
-                    key={group.team}
-                    className="grid gap-2 rounded-xl border px-3 py-3 md:grid-cols-[88px_minmax(0,1fr)] md:items-start"
-                  >
+                  <div key={group.team} className="grid gap-2 rounded-xl border px-3 py-3 md:grid-cols-[88px_minmax(0,1fr)] md:items-start">
                     <div className="pt-0.5">
                       <p className="text-sm font-semibold">{group.team}</p>
                     </div>
@@ -164,9 +117,7 @@ export function TeamsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Squad issue focus</CardTitle>
-            <CardDescription>
-              Snapshot issue aktif per team untuk bantu routing saat triage cepat.
-            </CardDescription>
+            <CardDescription>Snapshot issue aktif per team untuk bantu routing saat triage cepat.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 lg:grid-cols-3">
             {teamMetrics.map((team) => {

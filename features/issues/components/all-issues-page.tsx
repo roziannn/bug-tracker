@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Download, ListFilter, Search, ShieldAlert, TimerReset, TriangleAlert } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Download, ListFilter, Search, ShieldAlert, TimerReset, TriangleAlert } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
@@ -337,20 +337,36 @@ export function AllIssuesPage() {
               <div className="flex items-center gap-2">
                 <Button
                   disabled={currentPage === 1}
+                  onClick={() => setPage(1)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <ChevronsLeft />
+                </Button>
+                <Button
+                  disabled={currentPage === 1}
                   onClick={() => setPage((value) => Math.max(1, value - 1))}
                   variant="outline"
+                  size="sm"
                 >
-                  Previous
+                  <ChevronLeft />
                 </Button>
-                <Badge variant="outline">
-                  Page {currentPage} / {totalPages}
-                </Badge>
+                <Badge variant="outline">{currentPage}</Badge>
                 <Button
                   disabled={currentPage === totalPages}
                   onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
                   variant="outline"
+                  size="sm"
                 >
-                  Next
+                  <ChevronRight />
+                </Button>
+                <Button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setPage(totalPages)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <ChevronsRight />
                 </Button>
               </div>
             </div>
