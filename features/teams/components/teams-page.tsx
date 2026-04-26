@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Building2, Settings2, ShieldAlert, UserPlus, Users } from "lucide-react";
+import { Settings2, UserPlus } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar";

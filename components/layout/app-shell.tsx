@@ -3,33 +3,13 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  CircleDot,
-  ChevronsUpDown,
-  FolderKanban,
-  FolderOpenDot,
-  Gauge,
-  History,
-  KanbanSquare,
-  LogOut,
-  Plus,
-  Settings,
-  ShieldAlert,
-  UserCircle2,
-  Users,
-} from "lucide-react";
+import { CircleDot, ChevronsUpDown, FolderKanban, FolderOpenDot, Gauge, History, KanbanSquare, LogOut, Plus, Settings, ShieldAlert, UserCircle2, Users } from "lucide-react";
 
 import { NotificationDropdown } from "@/components/shared/navigation/notification-dropdown";
 import { ThemeToggle } from "@/components/shared/theme/theme-toggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -68,12 +48,7 @@ const navigation = [
   { id: "settings", label: "Settings", href: "/settings/menu", icon: Settings },
 ] as const;
 
-export function AppShell({
-  activeNav,
-  title,
-  toolbar,
-  children,
-}: AppShellProps) {
+export function AppShell({ activeNav, title, toolbar, children }: AppShellProps) {
   const router = useRouter();
 
   function handleLogout() {
@@ -94,9 +69,7 @@ export function AppShell({
             </div>
             <div className="min-w-0 group-data-[collapsible=icon]:hidden">
               <p className="truncate text-sm font-semibold">Bug Tracker</p>
-              <p className="truncate text-xs text-sidebar-foreground/70">
-                Engineering workspace
-              </p>
+              <p className="truncate text-xs text-sidebar-foreground/70">Engineering workspace</p>
             </div>
           </div>
         </SidebarHeader>
@@ -111,17 +84,11 @@ export function AppShell({
 
                   return (
                     <SidebarMenuItem key={item.label}>
-                      <SidebarMenuButton
-                        isActive={item.id === activeNav}
-                        render={<Link href={item.href} />}
-                        tooltip={item.label}
-                      >
+                      <SidebarMenuButton isActive={item.id === activeNav} render={<Link href={item.href} />} tooltip={item.label}>
                         <Icon />
                         <span>{item.label}</span>
                       </SidebarMenuButton>
-                      {"badge" in item && item.badge ? (
-                        <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
-                      ) : null}
+                      {"badge" in item && item.badge ? <SidebarMenuBadge>{item.badge}</SidebarMenuBadge> : null}
                     </SidebarMenuItem>
                   );
                 })}
@@ -140,23 +107,13 @@ export function AppShell({
                   </Avatar>
                   <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
                     <p className="truncate text-sm font-medium">Raka Aditya</p>
-                    <p className="truncate text-xs text-sidebar-foreground/70">
-                      Engineering Lead
-                    </p>
-                    <p className="truncate text-xs text-sidebar-foreground/60">
-                      raka@bugtracker.app
-                    </p>
+                    <p className="truncate text-xs text-sidebar-foreground/60">raka@bugtracker.app</p>
                   </div>
                   <ChevronsUpDown className="size-4 text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden" />
                 </button>
               }
             />
-            <DropdownMenuContent
-              align="end"
-              className="w-56"
-              side="top"
-              sideOffset={8}
-            >
+            <DropdownMenuContent align="end" className="w-56" side="top" sideOffset={8}>
               <div className="px-2 py-1.5">
                 <p className="text-sm font-medium text-foreground">Raka Aditya</p>
                 <p className="text-xs text-muted-foreground">raka@bugtracker.app</p>

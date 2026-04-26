@@ -28,6 +28,8 @@ type EnvironmentRow = {
   status: "Active" | "Synced" | "Protected";
 };
 
+type EnvironmentStatus = EnvironmentRow["status"];
+
 const initialEnvironments: EnvironmentRow[] = [
   {
     name: "Development",
@@ -51,7 +53,7 @@ const initialEnvironments: EnvironmentRow[] = [
 
 const PAGE_SIZE = 4;
 
-function statusBadgeVariant(status: EnvironmentRow["status"]) {
+function statusBadgeVariant(status: EnvironmentStatus) {
   if (status === "Protected") return "destructive";
   if (status === "Synced") return "secondary";
   return "default";
@@ -64,7 +66,7 @@ export function EnvironmentSettingsPage() {
   const [environmentName, setEnvironmentName] = useState("");
   const [apiBase, setApiBase] = useState("");
   const [database, setDatabase] = useState("");
-  const [status, setStatus] = useState<EnvironmentRow["status"]>("Active");
+  const [status, setStatus] = useState<EnvironmentStatus>("Active");
   const totalPages = Math.max(1, Math.ceil(environments.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const paginatedEnvironments = useMemo(
@@ -79,6 +81,19 @@ export function EnvironmentSettingsPage() {
           ? {
               ...environment,
               [field]: value,
+            }
+          : environment
+      )
+    );
+  }
+
+  function updateEnvironmentStatus(index: number, value: EnvironmentStatus) {
+    setEnvironments((current) =>
+      current.map((environment, currentIndex) =>
+        currentIndex === index
+          ? {
+              ...environment,
+              status: value,
             }
           : environment
       )
@@ -187,7 +202,7 @@ export function EnvironmentSettingsPage() {
 
                     <div className="grid gap-2">
                       <label className="text-sm font-medium">Status</label>
-                      <Select value={status} onValueChange={(value) => setStatus(value as EnvironmentRow["status"])}>
+                      <Select value={status} onValueChange={(value) => setStatus((value ?? "Active") as EnvironmentStatus)}>
                         <SelectTrigger className="w-full">
                           <SelectValue />
                         </SelectTrigger>
@@ -243,7 +258,7 @@ export function EnvironmentSettingsPage() {
                       <div className="flex items-center gap-2">
                         <Select
                           value={environment.status}
-                          onValueChange={(value) => updateEnvironment(absoluteIndex, "status", value)}
+                          onValueChange={(value) => updateEnvironmentStatus(absoluteIndex, (value ?? "Active") as EnvironmentStatus)}
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue />

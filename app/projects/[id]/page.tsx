@@ -1,4 +1,9 @@
+import type { Metadata } from "next";
 import { ProjectDetailPage } from "@/features/projects/components/project-detail-page";
+
+export const metadata: Metadata = {
+  title: "Project Detail",
+};
 
 export default async function ProjectDetailRoute({
   params,

@@ -1,4 +1,9 @@
+import type { Metadata } from "next";
 import { IssueDetailPage } from "@/features/issues/components/issue-detail-page";
+
+export const metadata: Metadata = {
+  title: "Issue Detail",
+};
 
 export default async function IssueDetailRoute({
   params,

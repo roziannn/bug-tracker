@@ -15,8 +15,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bug Tracker",
+  title: {
+    default: "Bug Tracker",
+    template: "Bug Tracker - %s",
+  },
   description: "Bug tracker dashboard starter built with Next.js and shadcn/ui",
+  icons: {
+    icon: "/icon",
+  },
 };
 
 export default function RootLayout({
