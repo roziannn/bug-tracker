@@ -30,6 +30,7 @@ type TeamMemberRecord = {
 
 export function TeamMembersPage({ id }: { id: string }) {
   const team = getTeamById(id);
+  const initialTeamName = team?.name ?? "";
   const [page, setPage] = useState(1);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [memberName, setMemberName] = useState("");
@@ -39,7 +40,7 @@ export function TeamMembersPage({ id }: { id: string }) {
   const [isActive, setIsActive] = useState<"active" | "inactive">("active");
   const [members, setMembers] = useState<TeamMemberRecord[]>(() =>
     picOptions
-      .filter((person) => person.team === (team?.name ?? ""))
+      .filter((person) => person.team === initialTeamName)
       .map((person, index) => ({
         id: person.value,
         name: person.label,
@@ -68,6 +69,8 @@ export function TeamMembersPage({ id }: { id: string }) {
       </AppShell>
     );
   }
+
+  const teamName = team.name;
 
   const totalPages = Math.max(1, Math.ceil(members.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -113,7 +116,7 @@ export function TeamMembersPage({ id }: { id: string }) {
         id: `${memberName.toLowerCase().replaceAll(/\s+/g, "-")}-${current.length + 1}`,
         name: memberName.trim(),
         email: memberEmail.trim(),
-        team: team.name,
+        team: teamName,
         role: memberRole,
         accessLevel,
         isActive: "active",
@@ -135,7 +138,7 @@ export function TeamMembersPage({ id }: { id: string }) {
     <AppShell
       activeNav="teams"
       eyebrow="People & ownership"
-      title={`Add Members - ${team.name}`}
+      title={`Add Members - ${teamName}`}
       toolbar={
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -153,7 +156,7 @@ export function TeamMembersPage({ id }: { id: string }) {
           <CardHeader>
             <CardTitle>{isEditing ? "Edit member" : "Add member"}</CardTitle>
             <CardDescription>
-              {isEditing ? `Update data anggota team \`${team.name}\` tanpa mengubah struktur group team lainnya.` : `Tambahkan anggota baru ke team \`${team.name}\` tanpa mengubah struktur group team lainnya.`}
+              {isEditing ? `Update data anggota team \`${teamName}\` tanpa mengubah struktur group team lainnya.` : `Tambahkan anggota baru ke team \`${teamName}\` tanpa mengubah struktur group team lainnya.`}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
@@ -212,7 +215,7 @@ export function TeamMembersPage({ id }: { id: string }) {
             <div className="flex gap-2">
               <Button onClick={handleSubmit}>
                 {isEditing ? <Save /> : <UserPlus />}
-                {isEditing ? "Save member" : `Add to ${team.name}`}
+                {isEditing ? "Save member" : `Add to ${teamName}`}
               </Button>
               {isEditing ? (
                 <Button onClick={resetForm} variant="outline">
@@ -226,7 +229,7 @@ export function TeamMembersPage({ id }: { id: string }) {
         <Card>
           <CardHeader>
             <CardTitle>Current members</CardTitle>
-            <CardDescription>Daftar member yang saat ini terhubung ke team {team.name}.</CardDescription>
+            <CardDescription>Daftar member yang saat ini terhubung ke team {teamName}.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <Table>
