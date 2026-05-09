@@ -125,6 +125,10 @@ export function EnvironmentSettingsPage() {
   return (
     <AppShell
       activeNav="settings"
+      breadcrumbs={[
+        { label: "Settings", href: "/settings/menu" },
+        { label: "Environment Settings" },
+      ]}
       eyebrow="Configuration"
       title="Settings"
       toolbar={

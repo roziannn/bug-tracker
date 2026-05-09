@@ -111,19 +111,6 @@ function IssuesToolbar({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight">Issue inventory</h2>
-          <p className="text-sm text-muted-foreground">
-            Track bug volume, filter by workflow state, and export the current view as CSV.
-          </p>
-        </div>
-        <Button onClick={onExport} size="lg">
-          <Download />
-          Export CSV
-        </Button>
-      </div>
-
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex w-full max-w-xl items-center gap-2 rounded-xl border bg-card px-3">
           <Search className="size-4 text-muted-foreground" />
@@ -179,6 +166,19 @@ function IssuesToolbar({
               ))}
             </SelectContent>
           </Select>
+
+          <Button
+            nativeButton={false}
+            render={
+              <Link href="/issues/create">
+                Create issue
+              </Link>
+            }
+          />
+          <Button onClick={onExport}>
+            <Download />
+            Export CSV
+          </Button>
         </div>
       </div>
     </div>
@@ -216,6 +216,7 @@ export function AllIssuesPage() {
   return (
     <AppShell
       activeNav="issues"
+      breadcrumbs={[{ label: "All Issues" }]}
       eyebrow="Issue registry"
       title="All Issues"
       toolbar={

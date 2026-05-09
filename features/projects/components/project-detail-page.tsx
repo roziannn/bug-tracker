@@ -15,6 +15,10 @@ export function ProjectDetailPage({ id }: { id: string }) {
     return (
       <AppShell
         activeNav="projects"
+        breadcrumbs={[
+          { label: "Projects", href: "/projects" },
+          { label: "Project Detail" },
+        ]}
         eyebrow="Project routing"
         title="Project Detail"
       >
@@ -42,6 +46,10 @@ export function ProjectDetailPage({ id }: { id: string }) {
   return (
     <AppShell
       activeNav="projects"
+      breadcrumbs={[
+        { label: "Projects", href: "/projects" },
+        { label: project.name },
+      ]}
       eyebrow="Project routing"
       title={project.name}
       toolbar={

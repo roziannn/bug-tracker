@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CircleDot, ChevronsUpDown, FolderKanban, FolderOpenDot, Gauge, History, KanbanSquare, LogOut, Plus, Settings, ShieldAlert, UserCircle2, Users } from "lucide-react";
+import { ChevronRight, CircleDot, ChevronsUpDown, FolderKanban, FolderOpenDot, Gauge, History, KanbanSquare, LogOut, Plus, Settings, ShieldAlert, UserCircle2, Users } from "lucide-react";
 
 import { NotificationDropdown } from "@/components/shared/navigation/notification-dropdown";
 import { ThemeToggle } from "@/components/shared/theme/theme-toggle";
@@ -34,6 +34,11 @@ type AppShellProps = {
   eyebrow?: string;
   title: string;
   toolbar?: ReactNode;
+  showCreateIssueButton?: boolean;
+  breadcrumbs?: Array<{
+    label: string;
+    href?: string;
+  }>;
   children: ReactNode;
 };
 
@@ -48,8 +53,16 @@ const navigation = [
   { id: "settings", label: "Settings", href: "/settings/menu", icon: Settings },
 ] as const;
 
-export function AppShell({ activeNav, title, toolbar, children }: AppShellProps) {
+export function AppShell({
+  activeNav,
+  title,
+  toolbar,
+  showCreateIssueButton = false,
+  breadcrumbs,
+  children,
+}: AppShellProps) {
   const router = useRouter();
+  const resolvedBreadcrumbs = breadcrumbs?.length ? breadcrumbs : [{ label: title }];
 
   function handleLogout() {
     appToast.success({
@@ -141,31 +154,60 @@ export function AppShell({ activeNav, title, toolbar, children }: AppShellProps)
                 <div className="flex items-center gap-3">
                   <SidebarTrigger />
                   <div>
-                    <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+                    <div className="flex flex-wrap items-center gap-1.5 text-lg">
+                      {resolvedBreadcrumbs.map((item, index) => {
+                        const isLastItem = index === resolvedBreadcrumbs.length - 1;
+
+                        return (
+                          <div key={`${item.label}-${index}`} className="flex items-center gap-1.5">
+                            {item.href && !isLastItem ? (
+                              <Link
+                                href={item.href}
+                                className="font-medium text-muted-foreground transition-colors hover:text-foreground"
+                              >
+                                {item.label}
+                              </Link>
+                            ) : (
+                              <span
+                                className={isLastItem ? "font-semibold tracking-tight text-foreground" : "font-medium text-muted-foreground"}
+                              >
+                                {item.label}
+                              </span>
+                            )}
+                            {!isLastItem ? (
+                              <ChevronRight className="size-4 text-muted-foreground/70" />
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
                   <NotificationDropdown />
-                  <Button
-                    nativeButton={false}
-                    render={
-                      <Link href="/issues/create">
-                        <Plus />
-                        Create issue
-                      </Link>
-                    }
-                    size="lg"
-                  />
+                  {showCreateIssueButton ? (
+                    <Button
+                      nativeButton={false}
+                      render={
+                        <Link href="/issues/create">
+                          <Plus />
+                          Create issue
+                        </Link>
+                      }
+                      size="lg"
+                    />
+                  ) : null}
                 </div>
               </div>
-
-              {toolbar}
             </div>
           </header>
 
-          <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</div>
+          <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            {toolbar ? <div className="mb-6">{toolbar}</div> : null}
+            {children}
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>

@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import Link from "next/link";
-import { FileUp, FolderOpenDot, ShieldAlert, UserRoundPlus } from "lucide-react";
+import { FileUp, ShieldAlert } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +32,10 @@ export function CreateIssuePage() {
   return (
     <AppShell
       activeNav="issues"
+      breadcrumbs={[
+        { label: "All Issues", href: "/issues" },
+        { label: "Create Issue" },
+      ]}
       eyebrow="Issue intake"
       title="Create Issue"
       toolbar={
@@ -217,9 +221,15 @@ export function CreateIssuePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {submitChecklist.map((item) => (
-                <div key={item} className="rounded-xl border bg-muted/30 p-4">
-                  <p className="text-sm leading-6">{item}</p>
+              {submitChecklist.map((item, index) => (
+                <div
+                  key={item}
+                  className="flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_10px_30px_-24px_rgba(15,23,42,0.45)] transition-transform duration-200 hover:-translate-y-0.5"
+                >
+                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-[11px] font-semibold text-white shadow-sm">
+                    {index + 1}
+                  </span>
+                  <p className="pt-0.5 text-sm leading-6 text-slate-700">{item}</p>
                 </div>
               ))}
             </CardContent>
@@ -228,43 +238,13 @@ export function CreateIssuePage() {
           <Card>
             <CardHeader>
               <CardTitle>Routing preview</CardTitle>
-              <CardDescription>
-                Ringkasan field yang biasanya menentukan prioritas dan assignment awal.
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start gap-3 rounded-xl border p-4">
-                <span className="mt-0.5 flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <ShieldAlert className="size-4" />
-                </span>
                 <div>
                   <p className="font-medium">Criticality tier</p>
                   <p className="text-sm text-muted-foreground">
                     Gunakan Tier 1 untuk bug yang blok release, transaksi, auth, atau data utama user.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 rounded-xl border p-4">
-                <span className="mt-0.5 flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <UserRoundPlus className="size-4" />
-                </span>
-                <div>
-                  <p className="font-medium">PIC selection</p>
-                  <p className="text-sm text-muted-foreground">
-                    PIC dipakai untuk owner awal issue, tapi masih bisa diubah saat triage.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 rounded-xl border p-4">
-                <span className="mt-0.5 flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <FolderOpenDot className="size-4" />
-                </span>
-                <div>
-                  <p className="font-medium">Project mapping</p>
-                  <p className="text-sm text-muted-foreground">
-                    Project membantu dashboard dan kanban memfilter issue berdasarkan product area.
                   </p>
                 </div>
               </div>

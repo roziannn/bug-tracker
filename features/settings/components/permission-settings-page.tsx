@@ -98,6 +98,10 @@ export function PermissionSettingsPage() {
   return (
     <AppShell
       activeNav="settings"
+      breadcrumbs={[
+        { label: "Settings", href: "/settings/menu" },
+        { label: "Permission Settings" },
+      ]}
       eyebrow="Configuration"
       title="Settings"
       toolbar={

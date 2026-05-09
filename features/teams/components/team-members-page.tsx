@@ -54,7 +54,15 @@ export function TeamMembersPage({ id }: { id: string }) {
 
   if (!team) {
     return (
-      <AppShell activeNav="teams" eyebrow="People & ownership" title="Team not found">
+      <AppShell
+        activeNav="teams"
+        breadcrumbs={[
+          { label: "Teams", href: "/teams" },
+          { label: "Team not found" },
+        ]}
+        eyebrow="People & ownership"
+        title="Team not found"
+      >
         <Card>
           <CardHeader>
             <CardTitle>Team not found</CardTitle>
@@ -137,6 +145,11 @@ export function TeamMembersPage({ id }: { id: string }) {
   return (
     <AppShell
       activeNav="teams"
+      breadcrumbs={[
+        { label: "Teams", href: "/teams" },
+        { label: teamName },
+        { label: "Add Members" },
+      ]}
       eyebrow="People & ownership"
       title={`Add Members - ${teamName}`}
       toolbar={

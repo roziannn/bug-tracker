@@ -94,6 +94,10 @@ export function MenuSettingsPage() {
   return (
     <AppShell
       activeNav="settings"
+      breadcrumbs={[
+        { label: "Settings", href: "/settings/menu" },
+        { label: "Menu Settings" },
+      ]}
       eyebrow="Configuration"
       title="Settings"
       toolbar={

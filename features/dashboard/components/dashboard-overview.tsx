@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { CircleDot, GitBranch, ListFilter, Search, ShieldAlert, Sparkles } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Cell, Label, Pie, PieChart, XAxis, YAxis } from "recharts";
 
@@ -10,6 +11,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Input } from "@/components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationFirst,
+  PaginationItem,
+  PaginationLast,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -126,6 +137,7 @@ const urgentIssues = issues.filter((issue) => issue.priority === "Critical" || i
 const busiestTeam = issuesByTeam[0];
 const urgentWatchlist = issues.filter((issue) => issue.priority === "Critical" || issue.priority === "High");
 const busiestStatus = [...issuesByStatus].sort((left, right) => right.total - left.total)[0];
+const WATCHLIST_PAGE_SIZE = 5;
 
 function getPriorityLabel(priority: PriorityKey) {
   return priorityChartConfig[priority].label ?? priority;
@@ -175,6 +187,14 @@ function DashboardToolbar() {
 }
 
 export function DashboardOverview() {
+  const [watchlistPage, setWatchlistPage] = useState(1);
+  const watchlistPageCount = Math.ceil(urgentWatchlist.length / WATCHLIST_PAGE_SIZE);
+  const watchlistStartIndex = (watchlistPage - 1) * WATCHLIST_PAGE_SIZE;
+  const paginatedWatchlist = urgentWatchlist.slice(
+    watchlistStartIndex,
+    watchlistStartIndex + WATCHLIST_PAGE_SIZE,
+  );
+
   return (
     <AppShell activeNav="overview" eyebrow="Sprint board" title="Product Quality Dashboard" toolbar={<DashboardToolbar />}>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -322,7 +342,7 @@ export function DashboardOverview() {
                 <CardTitle>Issue watchlist</CardTitle>
                 <CardDescription>Focus list for urgent items only, without medium and low noise.</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -334,7 +354,7 @@ export function DashboardOverview() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {urgentWatchlist.map((issue) => (
+                    {paginatedWatchlist.map((issue) => (
                       <TableRow key={issue.id}>
                         <TableCell>
                           <div className="space-y-1">
@@ -358,13 +378,64 @@ export function DashboardOverview() {
                     ))}
                   </TableBody>
                 </Table>
+
+                {watchlistPageCount > 1 ? (
+                  <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      Showing {watchlistStartIndex + 1}-{Math.min(watchlistStartIndex + WATCHLIST_PAGE_SIZE, urgentWatchlist.length)} of {urgentWatchlist.length} urgent issues
+                    </p>
+                    <Pagination className="mx-0 w-auto justify-start sm:justify-end">
+                      <PaginationContent>
+                        <PaginationItem>
+                          <PaginationFirst
+                            disabled={watchlistPage === 1}
+                            onClick={() => setWatchlistPage(1)}
+                          />
+                        </PaginationItem>
+                        <PaginationItem>
+                          <PaginationPrevious
+                            disabled={watchlistPage === 1}
+                            onClick={() => setWatchlistPage((current) => Math.max(1, current - 1))}
+                          />
+                        </PaginationItem>
+                        {Array.from({ length: watchlistPageCount }, (_, index) => {
+                          const page = index + 1;
+
+                          return (
+                            <PaginationItem key={page}>
+                              <PaginationLink
+                                isActive={watchlistPage === page}
+                                onClick={() => setWatchlistPage(page)}
+                              >
+                                {page}
+                              </PaginationLink>
+                            </PaginationItem>
+                          );
+                        })}
+                        <PaginationItem>
+                          <PaginationNext
+                            disabled={watchlistPage === watchlistPageCount}
+                            onClick={() =>
+                              setWatchlistPage((current) => Math.min(watchlistPageCount, current + 1))
+                            }
+                          />
+                        </PaginationItem>
+                        <PaginationItem>
+                          <PaginationLast
+                            disabled={watchlistPage === watchlistPageCount}
+                            onClick={() => setWatchlistPage(watchlistPageCount)}
+                          />
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="self-start pb-0">
               <CardHeader>
                 <CardTitle>Triage notes</CardTitle>
-                <CardDescription>Example panel for reusable cards, badges, inputs, and textarea fields.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="rounded-xl border bg-muted/30 p-3">

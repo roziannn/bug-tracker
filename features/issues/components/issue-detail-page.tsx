@@ -104,7 +104,15 @@ export function IssueDetailPage({ id }: { id: string }) {
 
   if (!issue) {
     return (
-      <AppShell activeNav="issues" eyebrow="Issue detail" title="Issue Not Found">
+      <AppShell
+        activeNav="issues"
+        breadcrumbs={[
+          { label: "All Issues", href: "/issues" },
+          { label: "Issue Not Found" },
+        ]}
+        eyebrow="Issue detail"
+        title="Issue Not Found"
+      >
         <Card>
           <CardHeader>
             <CardTitle>Issue not found</CardTitle>
@@ -123,6 +131,10 @@ export function IssueDetailPage({ id }: { id: string }) {
   return (
     <AppShell
       activeNav="issues"
+      breadcrumbs={[
+        { label: "All Issues", href: "/issues" },
+        { label: issue.id },
+      ]}
       eyebrow="Issue detail"
       title={issue.id}
       toolbar={

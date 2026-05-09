@@ -14,6 +14,10 @@ export function CreateProjectPage() {
   return (
     <AppShell
       activeNav="projects"
+      breadcrumbs={[
+        { label: "Projects", href: "/projects" },
+        { label: "Create Project" },
+      ]}
       eyebrow="Project routing"
       title="Create Project"
       toolbar={

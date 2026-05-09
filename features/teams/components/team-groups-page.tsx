@@ -105,6 +105,10 @@ export function TeamGroupsPage() {
   return (
     <AppShell
       activeNav="teams"
+      breadcrumbs={[
+        { label: "Teams", href: "/teams" },
+        { label: "Manage Group Teams" },
+      ]}
       eyebrow="People & ownership"
       title="Manage Group Teams"
       toolbar={
