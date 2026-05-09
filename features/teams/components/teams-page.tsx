@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Settings2, UserPlus } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -9,7 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TablePagination } from "@/components/ui/table-pagination";
 import { issues, picOptions, priorityVariant, teamMetrics } from "@/features/bug-tracker/data/bug-tracker-data";
+
+const PAGE_SIZE = 4;
 
 const picDirectoryByTeam = teamMetrics.map((team) => ({
   team: team.name,
@@ -17,6 +21,11 @@ const picDirectoryByTeam = teamMetrics.map((team) => ({
 }));
 
 export function TeamsPage() {
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(teamMetrics.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedTeams = teamMetrics.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
   return (
     <AppShell
       activeNav="teams"
@@ -49,7 +58,7 @@ export function TeamsPage() {
               <CardTitle>Team capacity</CardTitle>
               <CardDescription>Ringkasan squad, lead, SLA, issue aktif, dan akses cepat untuk tambah member ke team.</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -63,7 +72,7 @@ export function TeamsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {teamMetrics.map((team) => (
+                  {paginatedTeams.map((team) => (
                     <TableRow key={team.id}>
                       <TableCell className="font-medium">{team.name}</TableCell>
                       <TableCell>{team.lead}</TableCell>
@@ -83,6 +92,13 @@ export function TeamsPage() {
                   ))}
                 </TableBody>
               </Table>
+
+              <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Showing {paginatedTeams.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}-{Math.min(currentPage * PAGE_SIZE, teamMetrics.length)} of {teamMetrics.length} teams
+                </p>
+                <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setPage} />
+              </div>
             </CardContent>
           </Card>
 

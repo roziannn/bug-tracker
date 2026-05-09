@@ -11,19 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Input } from "@/components/ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationFirst,
-  PaginationItem,
-  PaginationLast,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TablePagination } from "@/components/ui/table-pagination";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { issues, overviewCards, priorityVariant, statusVariant } from "@/features/bug-tracker/data/bug-tracker-data";
@@ -384,50 +375,12 @@ export function DashboardOverview() {
                     <p className="text-sm text-muted-foreground">
                       Showing {watchlistStartIndex + 1}-{Math.min(watchlistStartIndex + WATCHLIST_PAGE_SIZE, urgentWatchlist.length)} of {urgentWatchlist.length} urgent issues
                     </p>
-                    <Pagination className="mx-0 w-auto justify-start sm:justify-end">
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationFirst
-                            disabled={watchlistPage === 1}
-                            onClick={() => setWatchlistPage(1)}
-                          />
-                        </PaginationItem>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            disabled={watchlistPage === 1}
-                            onClick={() => setWatchlistPage((current) => Math.max(1, current - 1))}
-                          />
-                        </PaginationItem>
-                        {Array.from({ length: watchlistPageCount }, (_, index) => {
-                          const page = index + 1;
-
-                          return (
-                            <PaginationItem key={page}>
-                              <PaginationLink
-                                isActive={watchlistPage === page}
-                                onClick={() => setWatchlistPage(page)}
-                              >
-                                {page}
-                              </PaginationLink>
-                            </PaginationItem>
-                          );
-                        })}
-                        <PaginationItem>
-                          <PaginationNext
-                            disabled={watchlistPage === watchlistPageCount}
-                            onClick={() =>
-                              setWatchlistPage((current) => Math.min(watchlistPageCount, current + 1))
-                            }
-                          />
-                        </PaginationItem>
-                        <PaginationItem>
-                          <PaginationLast
-                            disabled={watchlistPage === watchlistPageCount}
-                            onClick={() => setWatchlistPage(watchlistPageCount)}
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
+                    <TablePagination
+                      className="mx-0 w-auto justify-start sm:justify-end"
+                      currentPage={watchlistPage}
+                      totalPages={watchlistPageCount}
+                      onPageChange={setWatchlistPage}
+                    />
                   </div>
                 ) : null}
               </CardContent>

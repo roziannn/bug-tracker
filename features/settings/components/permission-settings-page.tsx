@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TablePagination } from "@/components/ui/table-pagination";
 import { SettingsSubnav } from "@/features/settings/components/settings-subnav";
 
 type AccessLevel = "Yes" | "No" | "Limited" | "View only";
@@ -293,21 +294,7 @@ export function PermissionSettingsPage() {
               <p className="text-sm text-muted-foreground">
                 Showing {paginatedPermissionRows.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}-{Math.min(currentPage * PAGE_SIZE, permissionRows.length)} of {permissionRows.length} roles
               </p>
-              <div className="flex items-center gap-2">
-                <Button disabled={currentPage === 1} onClick={() => setPage(1)} variant="outline" size="sm">
-                  <ChevronsLeft />
-                </Button>
-                <Button disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))} variant="outline" size="sm">
-                  <ChevronLeft />
-                </Button>
-                <Badge variant="outline">{currentPage}</Badge>
-                <Button disabled={currentPage === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} variant="outline" size="sm">
-                  <ChevronRight />
-                </Button>
-                <Button disabled={currentPage === totalPages} onClick={() => setPage(totalPages)} variant="outline" size="sm">
-                  <ChevronsRight />
-                </Button>
-              </div>
+              <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setPage} />
             </div>
           </CardContent>
         </Card>

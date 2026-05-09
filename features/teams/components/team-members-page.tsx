@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Pencil, Save, UserPlus } from "lucide-react";
+import { Pencil, Save, UserPlus } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TablePagination } from "@/components/ui/table-pagination";
 import { getTeamById, picOptions } from "@/features/bug-tracker/data/bug-tracker-data";
 
 const PAGE_SIZE = 4;
@@ -282,21 +283,7 @@ export function TeamMembersPage({ id }: { id: string }) {
               <p className="text-sm text-muted-foreground">
                 Showing {paginatedMembers.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}-{Math.min(currentPage * PAGE_SIZE, members.length)} of {members.length} members
               </p>
-              <div className="flex items-center gap-2">
-                <Button disabled={currentPage === 1} onClick={() => setPage(1)} variant="outline" size="sm">
-                  <ChevronsLeft />
-                </Button>
-                <Button disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))} variant="outline" size="sm">
-                  <ChevronLeft />
-                </Button>
-                <Badge variant="outline">{currentPage}</Badge>
-                <Button disabled={currentPage === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))} variant="outline" size="sm">
-                  <ChevronRight />
-                </Button>
-                <Button disabled={currentPage === totalPages} onClick={() => setPage(totalPages)} variant="outline" size="sm">
-                  <ChevronsRight />
-                </Button>
-              </div>
+              <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setPage} />
             </div>
           </CardContent>
         </Card>
