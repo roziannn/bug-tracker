@@ -1,8 +1,9 @@
 "use client";
 
-import { useId, useState } from "react";
+import type { FormEvent } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
-import { FileUp, ShieldAlert } from "lucide-react";
+import { FileUp, ShieldAlert, Trash2 } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ import {
   picOptions,
   projectOptions,
 } from "@/features/bug-tracker/data/bug-tracker-data";
+import { appToast } from "@/lib/app-toast";
 
 const submitChecklist = [
   "Judul issue harus spesifik dan gampang dicari tim engineering.",
@@ -25,9 +27,82 @@ const submitChecklist = [
   "Pilih PIC dan project supaya issue langsung masuk jalur triage yang benar.",
 ] as const;
 
+type EvidenceUpload = {
+  id: string;
+  name: string;
+  sizeLabel: string;
+  progress: number;
+  status: "uploading" | "done";
+};
+
+function formatFileSize(size: number) {
+  if (size >= 1024 * 1024) {
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  if (size >= 1024) {
+    return `${Math.round(size / 1024)} KB`;
+  }
+
+  return `${size} B`;
+}
+
 export function CreateIssuePage() {
   const uploadId = useId();
-  const [selectedEvidence, setSelectedEvidence] = useState<string[]>([]);
+  const [selectedEvidence, setSelectedEvidence] = useState<EvidenceUpload[]>([]);
+  const hasUploadingEvidence = selectedEvidence.some((file) => file.status === "uploading");
+
+  useEffect(() => {
+    const hasUploadingFile = selectedEvidence.some((file) => file.status === "uploading");
+
+    if (!hasUploadingFile) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setSelectedEvidence((current) =>
+        current.map((file) => {
+          if (file.status === "done") {
+            return file;
+          }
+
+          const nextProgress = Math.min(
+            100,
+            file.progress + Math.max(6, Math.round((100 - file.progress) * 0.18)),
+          );
+
+          return {
+            ...file,
+            progress: nextProgress,
+            status: nextProgress >= 100 ? "done" : "uploading",
+          };
+        }),
+      );
+    }, 220);
+
+    return () => window.clearInterval(timer);
+  }, [selectedEvidence]);
+
+  function handleDeleteEvidence(id: string) {
+    setSelectedEvidence((current) => current.filter((file) => file.id !== id));
+  }
+
+  function handleSubmitIssue(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (hasUploadingEvidence) {
+      appToast.error({
+        title: "Evidence masih di-upload",
+        description: "Tunggu semua file evidence mencapai 100% sebelum submit issue.",
+      });
+      return;
+    }
+
+    appToast.success({
+      title: "Issue siap disubmit",
+      description: "Semua evidence sudah selesai di-upload dan form bisa diproses.",
+    });
+  }
 
   return (
     <AppShell
@@ -65,7 +140,7 @@ export function CreateIssuePage() {
           </CardHeader>
 
           <CardContent>
-            <form className="grid gap-6">
+            <form className="grid gap-6" onSubmit={handleSubmitIssue}>
               <div className="grid gap-2">
                 <Label htmlFor="issue-title">Title</Label>
                 <Input
@@ -103,16 +178,59 @@ export function CreateIssuePage() {
                   className="hidden"
                   onChange={(event) => {
                     const files = Array.from(event.target.files ?? []);
-                    setSelectedEvidence(files.map((file) => file.name));
+                    if (!files.length) {
+                      return;
+                    }
+
+                    setSelectedEvidence((current) => [
+                      ...current,
+                      ...files.map((file, index) => ({
+                        id: `${file.name}-${file.size}-${Date.now()}-${index}`,
+                        name: file.name,
+                        sizeLabel: formatFileSize(file.size),
+                        progress: 0,
+                        status: "uploading" as const,
+                      })),
+                    ]);
+                    event.target.value = "";
                   }}
                 />
 
                 {selectedEvidence.length ? (
-                  <div className="flex flex-wrap gap-2">
-                    {selectedEvidence.map((fileName) => (
-                      <Badge key={fileName} variant="outline">
-                        {fileName}
-                      </Badge>
+                  <div className="space-y-3">
+                    {selectedEvidence.map((file) => (
+                      <div key={file.id} className="rounded-xl border bg-card p-3">
+                        <div className="mb-2 flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">{file.name}</p>
+                            <p className="text-xs text-muted-foreground">{file.sizeLabel}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {file.progress}%
+                            </span>
+                            <Badge variant={file.status === "done" ? "secondary" : "outline"}>
+                              {file.status === "done" ? "Uploaded" : "Uploading"}
+                            </Badge>
+                            {file.status === "done" ? (
+                              <Button
+                                onClick={() => handleDeleteEvidence(file.id)}
+                                size="icon-sm"
+                                type="button"
+                                variant="outline"
+                              >
+                                <Trash2 />
+                              </Button>
+                            ) : null}
+                          </div>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-primary transition-all duration-200"
+                            style={{ width: `${file.progress}%` }}
+                          />
+                        </div>
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -196,6 +314,10 @@ export function CreateIssuePage() {
                   </Select>
                 </div>
               </div>
+              <div className="flex items-center justify-end gap-2 border-t pt-6">
+                <Button variant="outline" type="button">Save draft</Button>
+                <Button disabled={hasUploadingEvidence} type="submit">Submit issue</Button>
+              </div>
             </form>
           </CardContent>
 
@@ -205,10 +327,15 @@ export function CreateIssuePage() {
               render={<Link href="/issues">Cancel</Link>}
               variant="outline"
             />
-            <div className="flex items-center gap-2">
-              <Button variant="outline">Save draft</Button>
-              <Button>Submit issue</Button>
-            </div>
+            {hasUploadingEvidence ? (
+              <p className="text-sm text-muted-foreground">
+                Submit akan aktif setelah semua evidence selesai upload.
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Semua evidence sudah siap untuk disubmit.
+              </p>
+            )}
           </CardFooter>
         </Card>
 
@@ -224,12 +351,12 @@ export function CreateIssuePage() {
               {submitChecklist.map((item, index) => (
                 <div
                   key={item}
-                  className="flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_10px_30px_-24px_rgba(15,23,42,0.45)] transition-transform duration-200 hover:-translate-y-0.5"
+                  className="flex items-start gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_10px_30px_-24px_rgba(15,23,42,0.45)] transition-transform duration-200 hover:-translate-y-0.5 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-[0_12px_32px_-24px_rgba(2,6,23,0.9)]"
                 >
-                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-[11px] font-semibold text-white shadow-sm">
+                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-[11px] font-semibold text-white shadow-sm dark:bg-slate-800 dark:text-slate-200">
                     {index + 1}
                   </span>
-                  <p className="pt-0.5 text-sm leading-6 text-slate-700">{item}</p>
+                  <p className="pt-0.5 text-sm leading-6 text-slate-700 dark:text-slate-200">{item}</p>
                 </div>
               ))}
             </CardContent>

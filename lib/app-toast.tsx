@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
+import type { ComponentProps } from "react";
+import { AlertCircle, Info, X } from "lucide-react";
 import { toast, type Toast } from "react-hot-toast";
 
 import { cn } from "@/lib/utils";
@@ -13,10 +14,30 @@ type AppToastOptions = {
 
 type AppToastVariant = "success" | "error" | "info";
 
-const variantStyles: Record<AppToastVariant, string> = {
-  success: "bg-emerald-500 text-white",
-  error: "bg-destructive text-white",
-  info: "bg-primary text-primary-foreground",
+function SuccessFilledIcon(props: ComponentProps<"svg">) {
+  return (
+    <svg
+      fill="none"
+      viewBox="0 0 20 20"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <circle cx="10" cy="10" fill="currentColor" r="9" />
+      <path
+        d="M6.6 10.2 8.8 12.4 13.4 7.8"
+        stroke="white"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.9"
+      />
+    </svg>
+  );
+}
+
+const iconClasses: Record<AppToastVariant, string> = {
+  success: "text-emerald-500 fill-emerald-500",
+  error: "text-destructive fill-destructive/15",
+  info: "text-primary fill-primary/15",
 };
 
 const iconAnimation: Record<AppToastVariant, string> = {
@@ -26,7 +47,7 @@ const iconAnimation: Record<AppToastVariant, string> = {
 };
 
 const variantIcons = {
-  success: CheckCircle2,
+  success: SuccessFilledIcon,
   error: AlertCircle,
   info: Info,
 } satisfies Record<AppToastVariant, React.ComponentType<{ className?: string }>>;
@@ -55,14 +76,8 @@ function GlassToast({
       }}
     >
       <div className="flex items-start gap-3">
-        <div
-          className={cn(
-            "mt-0.5 rounded-full p-1.5 shadow-sm",
-            variantStyles[variant],
-            iconAnimation[variant]
-          )}
-        >
-          <Icon className="size-4" />
+        <div className={cn("mt-0.5 shrink-0", iconAnimation[variant])}>
+          <Icon className={cn("size-5", iconClasses[variant])} />
         </div>
 
         <div className="min-w-0 flex-1">

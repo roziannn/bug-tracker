@@ -391,7 +391,7 @@ export const changelogEntries: ChangelogEntry[] = [
 ];
 
 export const projectOptions: ProjectOption[] = projectMetrics.map((project) => ({
-  value: project.id,
+  value: project.name,
   label: project.name,
   squad: project.team,
 }));
