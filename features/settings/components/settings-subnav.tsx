@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const settingsLinks = [
+  { href: "/settings/role", label: "Role" },
   { href: "/settings/menu", label: "Menu" },
-  { href: "/settings/permission", label: "Role" },
-  { href: "/settings/environment", label: "Environment" },
+  { href: "/settings/permission", label: "Permission" },
 ] as const;
 
 export function SettingsSubnav() {

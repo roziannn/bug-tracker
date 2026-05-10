@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { GripVertical, ListFilter, Search } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,16 +35,22 @@ type DragState = {
 function KanbanToolbar() {
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      <div className="flex w-full max-w-xl items-center gap-2 rounded-xl border bg-card px-3">
-        <Search className="size-4 text-muted-foreground" />
-        <Input
-          aria-label="Search board"
-          className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-          placeholder="Search cards, assignees, teams, or bug ids..."
-        />
+      <div>
+        <h2 className="text-lg font-semibold tracking-tight">Kanban flow and triage</h2>
+        <p className="text-sm text-muted-foreground">
+          Pantau alur issue aktif dan pindahkan status bug langsung dari board.
+        </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap lg:w-auto lg:justify-end">
+        <div className="flex w-full min-w-0 sm:min-w-72 items-center gap-2 rounded-xl border bg-card px-3 sm:w-auto">
+          <Search className="size-4 text-muted-foreground" />
+          <Input
+            aria-label="Search board"
+            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+            placeholder="Search cards, assignees, teams, or bug ids..."
+          />
+        </div>
         <Select defaultValue="critical-high">
           <SelectTrigger>
             <ListFilter />
@@ -93,8 +98,8 @@ function IssueCard({
         dragging && "opacity-55 ring-2 ring-primary/30"
       )}
     >
-      <CardHeader className="gap-3">
-        <div className="flex items-start justify-between gap-3">
+      <CardHeader>
+        <div className="flex items-start justify-between gap-2">
           <div>
             <CardTitle className="text-sm">{issue.id}</CardTitle>
             <CardDescription className="mt-1 leading-6 text-foreground/90">
@@ -112,12 +117,6 @@ function IssueCard({
         {issue.summary ? (
           <p className="text-sm leading-6 text-muted-foreground">{issue.summary}</p>
         ) : null}
-        <div className="flex items-center justify-between">
-          <Avatar size="sm">
-            <AvatarFallback>{issue.assignee}</AvatarFallback>
-          </Avatar>
-          <span className="text-xs text-muted-foreground">Drop to move status</span>
-        </div>
       </CardContent>
     </Card>
   );
@@ -149,8 +148,8 @@ function KanbanColumnView({
   return (
     <Card
       className={cn(
-        "flex h-full min-h-[32rem] flex-col border-dashed bg-muted/20",
-        isOver && "border-primary bg-primary/5 shadow-sm"
+        "relative flex h-full min-h-[32rem] flex-col border border-border/80 bg-muted/20 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-border/80 before:content-['']",
+        isOver && "border-primary bg-primary/5 before:bg-primary shadow-sm"
       )}
       onDragOver={(event) => {
         event.preventDefault();
@@ -161,7 +160,7 @@ function KanbanColumnView({
         onDrop(id);
       }}
     >
-      <CardHeader className="border-b">
+      <CardHeader>
         <div className="flex items-center justify-between gap-3">
           <div>
             <CardTitle className="text-base">{title}</CardTitle>
@@ -170,7 +169,7 @@ function KanbanColumnView({
           <Badge variant="secondary">{issues.length}</Badge>
         </div>
       </CardHeader>
-      <CardContent className="flex flex-1 flex-col gap-3 p-3">
+      <CardContent className="flex flex-1 rounded-lg flex-col gap-3 p-3">
         {issues.length ? (
           issues.map((issue) => (
             <IssueCard
@@ -182,7 +181,7 @@ function KanbanColumnView({
             />
           ))
         ) : (
-          <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed bg-background/70 px-4 text-center text-sm text-muted-foreground">
+          <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed bg-background/70 px-4 text-center text-sm text-muted-foreground">
             Drop bug cards here.
           </div>
         )}
@@ -203,7 +202,7 @@ export function KanbanBoard() {
       kanbanColumns.map((column) => ({
         ...column,
         issues: issues.filter((issue) => issue.status === column.id),
-      })),
+      })).filter((column) => column.id !== "Backlog"),
     [issues]
   );
 
@@ -223,12 +222,12 @@ export function KanbanBoard() {
       toolbar={<KanbanToolbar />}
     >
       <Card>
-        <CardHeader className="gap-4 border-b pb-5">
+        <CardHeader>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-3xl space-y-1.5">
-              <CardTitle className="text-xl tracking-tight">Drag and Drop Board</CardTitle>
-              <CardDescription className="max-w-2xl text-sm leading-6">
-              Move issues across backlog, ready, investigating, review, and done without leaving the bug tracker flow.
+            <div className="max-w-3xl space-y-1">
+              <CardTitle>Kanban Board</CardTitle>
+              <CardDescription>
+                Drag and drop ringkasan alur triage, perpindahan status issue, dan distribusi beban kerja aktif dalam satu board.
               </CardDescription>
             </div>
 
@@ -272,14 +271,12 @@ export function KanbanBoard() {
                     </div>
                   </div>
                 </div>
-
-                <DialogFooter showCloseButton />
               </DialogContent>
             </Dialog>
           </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          <div className="grid min-w-[72rem] gap-4 xl:grid-cols-5">
+          <div className="grid min-w-[58rem] gap-4 xl:grid-cols-4">
             {groupedIssues.map((column) => (
               <KanbanColumnView
                 key={column.id}

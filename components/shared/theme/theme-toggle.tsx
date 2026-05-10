@@ -1,9 +1,9 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { useTheme } from "next-themes";
 import { Check, Laptop, Moon, Sun } from "lucide-react";
 
+import { useTheme } from "@/components/app/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

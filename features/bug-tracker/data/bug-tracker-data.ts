@@ -23,6 +23,7 @@ export type IssueRecord = {
 export type OverviewCard = {
   label: string;
   value: string;
+  change: string;
   note: string;
   icon: "circle-dot" | "shield-alert" | "git-branch" | "sparkles";
 };
@@ -88,10 +89,10 @@ function newId(value: string) {
 }
 
 export const overviewCards: OverviewCard[] = [
-  { label: "Open bugs", value: "34", note: "+5 since yesterday", icon: "circle-dot" },
-  { label: "Critical issues", value: "7", note: "2 need triage now", icon: "shield-alert" },
-  { label: "In progress", value: "18", note: "Across 4 active sprints", icon: "git-branch" },
-  { label: "Resolved this week", value: "29", note: "86% closed within SLA", icon: "sparkles" },
+  { label: "Open bugs", value: "34", change: "+12.4%", note: "+5 since yesterday", icon: "circle-dot" },
+  { label: "Critical issues", value: "7", change: "+2.0%", note: "2 need triage now", icon: "shield-alert" },
+  { label: "In progress", value: "18", change: "+6.1%", note: "Across 4 active sprints", icon: "git-branch" },
+  { label: "Resolved this week", value: "29", change: "+18.7%", note: "86% closed within SLA", icon: "sparkles" },
 ];
 
 export const issues: IssueRecord[] = [

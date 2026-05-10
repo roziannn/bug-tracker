@@ -46,7 +46,11 @@ function accessBadgeVariant(value: AccessLevel) {
   return "outline";
 }
 
-export function PermissionSettingsPage() {
+type PermissionSettingsPageProps = {
+  mode?: "permission" | "role";
+};
+
+export function PermissionSettingsPage({ mode = "permission" }: PermissionSettingsPageProps) {
   const [permissionRows, setPermissionRows] = useState<PermissionRow[]>(initialPermissionRows);
   const [page, setPage] = useState(1);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -60,6 +64,12 @@ export function PermissionSettingsPage() {
     () => permissionRows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
     [currentPage, permissionRows]
   );
+  const isRoleMode = mode === "role";
+  const pageLabel = isRoleMode ? "Role Settings" : "Permission Settings";
+  const headingLabel = isRoleMode ? "Role settings" : "Permission settings";
+  const headingDescription = isRoleMode
+    ? "Kelola role access untuk menu, permission, dan environment exposure langsung dari satu tabel."
+    : "Edit role access untuk menu settings, permission management, dan environment exposure langsung dari tabel.";
 
   function updatePermission(index: number, field: keyof Omit<PermissionRow, "role">, value: AccessLevel) {
     setPermissionRows((current) =>
@@ -101,17 +111,15 @@ export function PermissionSettingsPage() {
       activeNav="settings"
       breadcrumbs={[
         { label: "Settings", href: "/settings/menu" },
-        { label: "Permission Settings" },
+        { label: pageLabel },
       ]}
       eyebrow="Configuration"
       title="Settings"
       toolbar={
         <div className="flex flex-col gap-3">
           <div>
-            <h2 className="text-lg font-semibold tracking-tight">Permission settings</h2>
-            <p className="text-sm text-muted-foreground">
-              Edit role access untuk menu settings, permission management, dan environment exposure langsung dari tabel.
-            </p>
+            <h2 className="text-lg font-semibold tracking-tight">{headingLabel}</h2>
+            <p className="text-sm text-muted-foreground">{headingDescription}</p>
           </div>
           <SettingsSubnav />
         </div>

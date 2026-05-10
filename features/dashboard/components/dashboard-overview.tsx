@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CircleDot, GitBranch, ListFilter, Search, ShieldAlert, Sparkles } from "lucide-react";
+import { CircleDot, GitBranch, ListFilter, ShieldAlert, Sparkles } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, Cell, Label, Pie, PieChart, XAxis, YAxis } from "recharts";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -134,49 +133,6 @@ function getPriorityLabel(priority: PriorityKey) {
   return priorityChartConfig[priority].label ?? priority;
 }
 
-function DashboardToolbar() {
-  return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      <div className="flex w-full max-w-xl items-center gap-2 rounded-xl border bg-card px-3">
-        <Search className="size-4 text-muted-foreground" />
-        <Input aria-label="Search issues" className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0" placeholder="Search issues, tags, reporters, or release versions..." />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Select defaultValue="all">
-          <SelectTrigger>
-            <ListFilter />
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            <SelectItem value="open">Open</SelectItem>
-            <SelectItem value="review">In review</SelectItem>
-            <SelectItem value="done">Resolved</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select defaultValue="sprint-12">
-          <SelectTrigger>
-            <SelectValue placeholder="Sprint" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="sprint-12">Sprint 12</SelectItem>
-            <SelectItem value="sprint-11">Sprint 11</SelectItem>
-            <SelectItem value="backlog">Backlog</SelectItem>
-          </SelectContent>
-        </Select>
-        <AvatarGroup>
-          {["RA", "MI", "AL"].map((name) => (
-            <Avatar key={name} size="sm">
-              <AvatarFallback>{name}</AvatarFallback>
-            </Avatar>
-          ))}
-        </AvatarGroup>
-      </div>
-    </div>
-  );
-}
-
 export function DashboardOverview() {
   const [watchlistPage, setWatchlistPage] = useState(1);
   const watchlistPageCount = Math.ceil(urgentWatchlist.length / WATCHLIST_PAGE_SIZE);
@@ -187,21 +143,84 @@ export function DashboardOverview() {
   );
 
   return (
-    <AppShell activeNav="overview" eyebrow="Sprint board" title="Product Quality Dashboard" toolbar={<DashboardToolbar />}>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <AppShell
+      activeNav="overview"
+      eyebrow="Sprint board"
+      title="Product Quality Dashboard"
+      toolbar={
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight">Issue monitoring and triage</h2>
+            <p className="text-sm text-muted-foreground">
+              Pantau daftar issue, prioritas, dan workflow triage dalam satu tampilan.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Select defaultValue="all">
+              <SelectTrigger>
+                <ListFilter />
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="open">Open</SelectItem>
+                <SelectItem value="review">In review</SelectItem>
+                <SelectItem value="done">Resolved</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select defaultValue="sprint-12">
+              <SelectTrigger>
+                <SelectValue placeholder="Sprint" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="sprint-12">Sprint 12</SelectItem>
+                <SelectItem value="sprint-11">Sprint 11</SelectItem>
+                <SelectItem value="backlog">Backlog</SelectItem>
+              </SelectContent>
+            </Select>
+            <AvatarGroup>
+              {["RA", "MI", "AL"].map((name) => (
+                <Avatar key={name} size="sm">
+                  <AvatarFallback>{name}</AvatarFallback>
+                </Avatar>
+              ))}
+            </AvatarGroup>
+          </div>
+        </div>
+      }
+    >
+      <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
         {overviewCards.map((card) => {
           const Icon = iconMap[card.icon];
 
           return (
-            <Card key={card.label}>
-              <CardHeader>
-                <CardDescription>{card.label}</CardDescription>
-                <CardTitle className="text-3xl">{card.value}</CardTitle>
+            <Card key={card.label} className="h-full">
+              <CardHeader className="h-full">
+                <div className="flex h-full items-start justify-between gap-4">
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <CardDescription className="truncate font-semibold">
+                      {card.label}
+                    </CardDescription>
+
+                    <CardDescription className="mt-1 truncate">
+                      {card.note}
+                    </CardDescription>
+
+                    <div className="mt-3 flex items-center gap-3">
+                      <CardTitle className="text-4xl leading-none">
+                        {card.value}
+                      </CardTitle>
+
+                      <Badge variant="secondary" className="translate-y-0.5">
+                        {card.change}
+                      </Badge>
+                    </div>
+                  </div>
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Icon className="size-4" />
+                  </span>
+                </div>
               </CardHeader>
-              <CardFooter className="justify-between">
-                <span className="text-xs text-muted-foreground">{card.note}</span>
-                <Icon className="size-4 text-muted-foreground" />
-              </CardFooter>
             </Card>
           );
         })}

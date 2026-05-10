@@ -116,15 +116,15 @@
 
     return (
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="space-y-1.5">
+        <div className="min-w-0 space-y-1.5">
           <CardTitle>Issue table</CardTitle>
           <CardDescription>
             Filter current bug inventory by workflow state, severity, and label.
           </CardDescription>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap lg:justify-end">
-          <div className="flex w-full min-w-56 items-center gap-2 rounded-xl border bg-card px-3 sm:w-auto">
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap lg:w-auto lg:justify-end">
+          <div className="flex w-full min-w-0 sm:min-w-56 items-center gap-2 rounded-xl border bg-card px-3 sm:w-auto">
             <Search className="size-4 text-muted-foreground" />
             <Input
               aria-label="Search issues"
@@ -136,7 +136,7 @@
           </div>
 
           <Select value={status} onValueChange={(value) => onStatusChange(value as StatusFilter)}>
-            <SelectTrigger className="w-auto min-w-[88px]">
+            <SelectTrigger className="h-9 w-auto min-w-[88px] px-2.5">
               <SelectValue placeholder="all" />
             </SelectTrigger>
             <SelectContent>
@@ -153,7 +153,7 @@
             value={priority}
             onValueChange={(value) => onPriorityChange(value as PriorityFilter)}
           >
-            <SelectTrigger className="w-auto min-w-[88px]">
+            <SelectTrigger className="h-9 w-auto min-w-[88px] px-2.5">
               <SelectValue placeholder="all" />
             </SelectTrigger>
             <SelectContent>
@@ -166,7 +166,7 @@
           </Select>
 
           <Select value={label} onValueChange={(value) => onLabelChange(value as LabelFilter)}>
-            <SelectTrigger className="w-auto min-w-[88px]">
+            <SelectTrigger className="h-9 w-auto min-w-[88px] px-2.5">
               <SelectValue placeholder="all" />
             </SelectTrigger>
             <SelectContent>
@@ -232,7 +232,7 @@
         title="All Issues"
         toolbar={
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div>
+            <div className="min-w-0">
               <h2 className="text-lg font-semibold tracking-tight">Issue monitoring and triage</h2>
               <p className="text-sm text-muted-foreground">
                 Pantau daftar issue, prioritas, dan workflow triage dalam satu tampilan.
@@ -252,29 +252,40 @@
           </div>
         }
       >
-        <div className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {stats.map((item) => {
-              const Icon = item.icon;
+      <div className="min-w-0 space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
+          {stats.map((item) => {
+            const Icon = item.icon;
 
-              return (
-                <Card key={item.title}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <CardDescription>{item.title}</CardDescription>
-                        <CardTitle className="mt-2 text-3xl">{item.value}</CardTitle>
-                        <div className="mt-3 flex items-center gap-3">
-                          <Badge variant="secondary">{item.change}</Badge>
-                          <span className="text-xs text-muted-foreground">{item.note}</span>
-                        </div>
+            return (
+              <Card key={item.title} className="h-full">
+                <CardHeader className="h-full">
+                  <div className="flex h-full items-start justify-between gap-4">
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <CardDescription className="truncate font-semibold">
+                        {item.title}
+                      </CardDescription>
+
+                      <CardDescription className="mt-1 truncate">
+                        {item.note}
+                      </CardDescription>
+
+                      <div className="mt-3 flex items-center gap-3">
+                        <CardTitle className="text-4xl leading-none">
+                          {item.value}
+                        </CardTitle>
+
+                        <Badge variant="secondary" className="translate-y-0.5">
+                          {item.change}
+                        </Badge>
                       </div>
-                      <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <Icon className="size-5" />
-                      </span>
                     </div>
-                  </CardHeader>
-                </Card>
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <Icon className="size-4" />
+                    </span>
+                  </div>
+                </CardHeader>
+              </Card>
               );
             })}
           </div>
@@ -306,58 +317,58 @@
               />
             </CardHeader>
             <CardContent className="space-y-4">
-              <Table>
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Ticket ID</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Label</TableHead>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Created date</TableHead>
-                    <TableHead>Action</TableHead>
+                    <TableHead className="w-[10%]">Ticket ID</TableHead>
+                    <TableHead className="w-[28%]">Title</TableHead>
+                    <TableHead className="w-[10%]">Label</TableHead>
+                    <TableHead className="w-[10%]">Team</TableHead>
+                    <TableHead className="w-[12%]">Status</TableHead>
+                    <TableHead className="w-[10%]">Priority</TableHead>
+                    <TableHead className="w-[12%]">Created date</TableHead>
+                    <TableHead className="w-[8%]">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedIssues.length ? (
                     paginatedIssues.map((issue) => (
                       <TableRow key={issue.id}>
-                        <TableCell className="font-medium">{issue.id}</TableCell>
-                        <TableCell>
-                          <p className="max-w-xl font-medium">{issue.title}</p>
+                        <TableCell className="font-medium whitespace-normal break-words">{issue.id}</TableCell>
+                        <TableCell className="whitespace-normal break-words">
+                          <p className="font-medium">{issue.title}</p>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="whitespace-normal">
                           <Badge variant="outline">{issue.label}</Badge>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell className="text-muted-foreground whitespace-normal break-words">
                           {issue.team}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="whitespace-normal">
                           <Badge variant={statusVariant(issue.status)}>{issue.status}</Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="whitespace-normal">
                           <Badge variant={priorityVariant(issue.priority)}>{issue.priority}</Badge>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
+                        <TableCell className="text-muted-foreground whitespace-normal">
                           {formatDate(issue.createdAt)}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="whitespace-normal">
                           <Button
                             nativeButton={false}
                             render={<Link href={`/issues/${issue.id}`} />}
                             size="sm"
                             variant="outline"
                           >
-                            <Eye/>
-                            Show issue
+                            <Eye />
+                            Show
                           </Button>
                         </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                      <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
                         No issues match the current filters.
                       </TableCell>
                     </TableRow>

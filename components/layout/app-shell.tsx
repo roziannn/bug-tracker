@@ -1,9 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Bell, ChevronRight, ChevronsUpDown, CircleDot, CreditCard, FolderKanban, FolderOpenDot, Gauge, History, KanbanSquare, LogOut, PencilLine, Plus, Settings, ShieldAlert, UserCircle2, Users } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Bell, ChevronRight, ChevronsUpDown, CircleDot, CreditCard, FolderKanban, FolderOpenDot, Gauge, History, KanbanSquare, LogOut, PencilLine, Plus, Settings, UserCircle2, Users } from "lucide-react";
 
 import { NotificationDropdown } from "@/components/shared/navigation/notification-dropdown";
 import { ThemeToggle } from "@/components/shared/theme/theme-toggle";
@@ -23,14 +24,18 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 import { appToast } from "@/lib/app-toast";
 
 type AppShellProps = {
-  activeNav: "overview" | "issues" | "kanban" | "teams" | "projects" | "changelog" | "settings";
+  activeNav: "overview" | "issues" | "kanban" | "teams" | "projects" | "changelog" | "settings" | "audit-trail";
   eyebrow?: string;
   title: string;
   toolbar?: ReactNode;
@@ -42,15 +47,38 @@ type AppShellProps = {
   children: ReactNode;
 };
 
-const navigation = [
+type NavigationChild = {
+  id: string;
+  label: string;
+  href: string;
+};
+
+type NavigationItem = {
+  id: AppShellProps["activeNav"] | "settings-group";
+  label: string;
+  href?: string;
+  icon: typeof Gauge;
+  badge?: string;
+  children?: readonly NavigationChild[];
+};
+
+const navigation: readonly NavigationItem[] = [
   { id: "overview", label: "Overview", href: "/", icon: Gauge },
   { id: "issues", label: "All Issues", href: "/issues", icon: CircleDot, badge: "34" },
   { id: "kanban", label: "Kanban", href: "/kanban", icon: KanbanSquare },
-  // { id: "triage", label: "Triage Queue", href: "/", icon: ShieldAlert, badge: "7" },
   { id: "teams", label: "Teams", href: "/teams", icon: Users },
   { id: "projects", label: "Projects", href: "/projects", icon: FolderOpenDot },
   { id: "changelog", label: "Changelog", href: "/changelog", icon: History },
-  { id: "settings", label: "Settings", href: "/settings/menu", icon: Settings },
+  {
+    id: "settings-group",
+    label: "Settings",
+    icon: Settings,
+    children: [
+      { id: "role", label: "Role", href: "/settings/role" },
+      { id: "menu", label: "Menu", href: "/settings/menu" },
+      { id: "permission", label: "Permission", href: "/settings/permission" },
+    ],
+  },
   { id: "audit-trail", label: "Audit Trail", href: "/audit-trail", icon: PencilLine },
 ] as const;
 
@@ -63,7 +91,15 @@ export function AppShell({
   children,
 }: AppShellProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const resolvedBreadcrumbs = breadcrumbs?.length ? breadcrumbs : [{ label: title }];
+  const [isSettingsOpen, setIsSettingsOpen] = useState(pathname.startsWith("/settings"));
+
+  useEffect(() => {
+    if (pathname.startsWith("/settings")) {
+      setIsSettingsOpen(true);
+    }
+  }, [pathname]);
 
   function handleLogout() {
     appToast.success({
@@ -97,13 +133,51 @@ export function AppShell({
               <SidebarMenu>
                 {navigation.map((item) => {
                   const Icon = item.icon;
+                  const isSettingsGroup = item.id === "settings-group";
+                  const hasChildren = Boolean(item.children?.length);
+                  const isChildActive = item.children?.some((child) => pathname === child.href) ?? false;
+                  const isActive = isSettingsGroup ? isChildActive : item.id === activeNav;
 
                   return (
                     <SidebarMenuItem key={item.label}>
-                      <SidebarMenuButton isActive={item.id === activeNav} render={<Link href={item.href} />} tooltip={item.label}>
-                        <Icon />
-                        <span>{item.label}</span>
-                      </SidebarMenuButton>
+                      {hasChildren ? (
+                        <>
+                          <SidebarMenuButton
+                            isActive={isActive}
+                            onClick={() => setIsSettingsOpen((current) => !current)}
+                            tooltip={item.label}
+                            type="button"
+                          >
+                            <Icon />
+                            <span>{item.label}</span>
+                            <ChevronRight
+                              className={cn(
+                                "ml-auto transition-transform duration-200 group-data-[collapsible=icon]:hidden",
+                                isSettingsOpen && "rotate-90",
+                              )}
+                            />
+                          </SidebarMenuButton>
+                          {isSettingsOpen ? (
+                            <SidebarMenuSub>
+                              {item.children?.map((child) => (
+                                <SidebarMenuSubItem key={child.id}>
+                                  <SidebarMenuSubButton
+                                    isActive={pathname === child.href}
+                                    render={<Link href={child.href} />}
+                                  >
+                                    <span>{child.label}</span>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </SidebarMenuSub>
+                          ) : null}
+                        </>
+                      ) : (
+                        <SidebarMenuButton isActive={isActive} render={<Link href={item.href ?? "#"} />} tooltip={item.label}>
+                          <Icon />
+                          <span>{item.label}</span>
+                        </SidebarMenuButton>
+                      )}
                       {"badge" in item && item.badge ? <SidebarMenuBadge>{item.badge}</SidebarMenuBadge> : null}
                     </SidebarMenuItem>
                   );
