@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, ChevronRight, ChevronsUpDown, CircleDot, CreditCard, FolderKanban, FolderOpenDot, Gauge, History, KanbanSquare, LogOut, PencilLine, Plus, Settings, UserCircle2, Users } from "lucide-react";
+import { Bell, ChevronRight, ChevronsUpDown, CircleDot, CreditCard, FileSearch, FileSearch2, FolderKanban, FolderOpenDot, Gauge, History, KanbanSquare, LogOut, PencilLine, Plus, Settings, UserCircle2, Users } from "lucide-react";
 
 import { NotificationDropdown } from "@/components/shared/navigation/notification-dropdown";
 import { ThemeToggle } from "@/components/shared/theme/theme-toggle";
@@ -79,7 +79,7 @@ const navigation: readonly NavigationItem[] = [
       { id: "permission", label: "Permission", href: "/settings/permission" },
     ],
   },
-  { id: "audit-trail", label: "Audit Trail", href: "/audit-trail", icon: PencilLine },
+  { id: "audit-trail", label: "Audit Trail", href: "/audit-trail", icon: FileSearch2 },
 ] as const;
 
 export function AppShell({
@@ -191,13 +191,13 @@ export function AppShell({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button className="flex w-full items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/60 px-3 py-2.5 text-left transition-all hover:bg-sidebar-accent group-data-[collapsible=icon]:size-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-full group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0 group-data-[collapsible=icon]:hover:bg-transparent">
+                <button className="flex w-full items-center gap-2 rounded-xl border border-sidebar-border bg-sidebar-accent/60 px-3 py-2.5 text-left transition-all hover:bg-sidebar-accent group-data-[collapsible=icon]:size-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-full group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0 group-data-[collapsible=icon]:hover:bg-transparent">
                   <Avatar data-size="lg">
-                    <AvatarFallback>RA</AvatarFallback>
+                    <AvatarFallback>FT</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-                    <p className="truncate text-sm font-medium">Raka Aditya</p>
-                    <p className="truncate text-xs text-sidebar-foreground/60">raka@bugtracker.app</p>
+                    <p className="truncate text-sm font-medium">Firda Rosiana Tanj</p>
+                    <p className="truncate text-xs text-sidebar-foreground/60">firda@bugtracker.app</p>
                   </div>
                   <ChevronsUpDown className="size-4 text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden" />
                 </button>
@@ -206,11 +206,11 @@ export function AppShell({
             <DropdownMenuContent align="end" className="w-72 rounded-xl p-0" side="top" sideOffset={8}>
               <div className="flex items-center gap-3 px-3 py-3">
                 <Avatar data-size="lg">
-                  <AvatarFallback>RA</AvatarFallback>
+                  <AvatarFallback>FT</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-foreground">Raka Aditya</p>
-                  <p className="truncate text-xs text-muted-foreground">raka@bugtracker.app</p>
+                  <p className="truncate text-sm font-semibold text-foreground">Firda Rosiana Tanj</p>
+                  <p className="truncate text-xs text-muted-foreground">firda@bugtracker.app</p>
                 </div>
               </div>
               <DropdownMenuSeparator />
