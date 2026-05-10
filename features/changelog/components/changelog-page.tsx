@@ -49,7 +49,7 @@ export function ChangelogPage() {
             <h2 className="text-lg font-semibold tracking-tight">Product evolution log</h2>
             <p className="text-sm text-muted-foreground">Track what changed in the bug tracker across features, workflow improvements, and stability updates.</p>
           </div>
-          <Badge variant="secondary">Latest: {latestEntry.version}</Badge>
+          <Badge variant="secondary" className="p-3 font-semibold text-sm">Latest: {latestEntry.version}</Badge>
         </div>
       }
     >
@@ -96,16 +96,17 @@ export function ChangelogPage() {
             </div>
           </CardHeader>
           <CardContent className="grid gap-3 p-6 md:grid-cols-3">
+            <ul className="space-y-3">
             {latestEntry.highlights.map((highlight) => (
-              <div key={highlight} className="rounded-xl border bg-background p-4">
-                <div className="flex items-start gap-3">
-                  <span className="mt-0.5 flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <ArrowUpRight className="size-4" />
-                  </span>
-                  <p className="text-sm leading-6">{highlight}</p>
-                </div>
-              </div>
+              <li
+                key={highlight}
+                className="flex items-start gap-3 text-sm leading-6"
+              >
+                <span className="mt-2 size-2 shrink-0 rounded-full bg-primary" />
+                <span>{highlight}</span>
+              </li>
             ))}
+          </ul>
           </CardContent>
         </Card>
 
@@ -126,13 +127,17 @@ export function ChangelogPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-3 md:grid-cols-3">
+                <ul className="space-y-3">
                   {entry.highlights.map((highlight) => (
-                    <div key={highlight} className="rounded-xl border bg-muted/20 p-4">
-                      <p className="text-sm leading-6">{highlight}</p>
-                    </div>
+                    <li
+                      key={highlight}
+                      className="flex items-start gap-3 text-sm leading-6"
+                    >
+                      <span className="mt-2 size-2 shrink-0 rounded-full bg-primary" />
+                      <span>{highlight}</span>
+                    </li>
                   ))}
-                </div>
+                </ul>
                 {index < changelogEntries.length - 1 ? <Separator /> : null}
               </CardContent>
             </Card>

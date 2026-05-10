@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, CalendarDays, Flag, Hash, Link2, Server, ShieldAlert, UserRound, Users } from "lucide-react";
+import { Activity, ArrowLeft, CalendarDays, Flag, Hash, Link2, Server, ShieldAlert, UserRound, Users } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +36,7 @@ export function ProjectDetailPage({ id }: { id: string }) {
               render={<Link href="/projects" />}
               variant="outline"
             >
-              Back to projects
+             <ArrowLeft/> Back to projects
             </Button>
           </CardContent>
         </Card>
@@ -66,11 +66,11 @@ export function ProjectDetailPage({ id }: { id: string }) {
             render={<Link href="/projects" />}
             variant="outline"
           >
-            Back to projects
+          <ArrowLeft/> Back to projects
           </Button>
         </div>
       }
-    >
+    > 
       <div className="space-y-6">
         <Card>
           <CardHeader>

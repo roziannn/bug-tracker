@@ -157,31 +157,41 @@ export function ProjectsPage() {
     >
       <div className="min-w-0 space-y-6">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {projectHighlights.map((item) => {
-            const Icon = item.icon;
+  {projectHighlights.map((item) => {
+    const Icon = item.icon;
 
-            return (
-              <Card key={item.label}>
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <CardDescription>{item.label}</CardDescription>
-                      <CardTitle className="mt-2 text-3xl">{item.value}</CardTitle>
-                      <div className="mt-3 flex min-w-0 flex-wrap items-center gap-2">
-                        <Badge variant="secondary">{item.change}</Badge>
-                        <span className="min-w-0 text-xs text-muted-foreground">{item.note}</span>
-                      </div>
-                    </div>
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Icon className="size-5" />
-                    </span>
-                  </div>
-                </CardHeader>
-              </Card>
-            );
-          })}
-        </div>
+    return (
+      <Card key={item.label} className="h-full">
+        <CardHeader className="h-full">
+          <div className="flex h-full items-start justify-between gap-4">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <CardDescription className="truncate font-semibold">
+                {item.label}
+              </CardDescription>
+              <CardDescription className="mt-1 truncate">
+                {item.note}
+              </CardDescription>
 
+              <div className="mt-3 flex items-center gap-3">
+                <CardTitle className="text-4xl leading-none">
+                  {item.value}
+                </CardTitle>
+
+                <Badge variant="secondary" className="translate-y-0.5">
+                  {item.change}
+                </Badge>
+              </div>
+            </div>
+
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Icon className="size-5" />
+            </span>
+          </div>
+        </CardHeader>
+      </Card>
+    );
+  })}
+</div>
         <Card>
           <CardHeader className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 space-y-1.5">
@@ -247,13 +257,12 @@ export function ProjectsPage() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="w-full overflow-x-auto">
               <Table className="table-fixed">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[13%]">Project</TableHead>
-                    <TableHead className="w-[8%]">Team</TableHead>
-                    <TableHead className="w-[12%]">Owner</TableHead>
+                    <TableHead className="w-[8%]">Project</TableHead>
+                    <TableHead className="w-[5%]">Team</TableHead>
+                    <TableHead className="w-[8%]">Owner</TableHead>
                     <TableHead className="w-[8%]">Status</TableHead>
                     <TableHead className="w-[5%]">Issues</TableHead>
                     <TableHead className="w-[5%]">Critical</TableHead>
@@ -303,8 +312,6 @@ export function ProjectsPage() {
                   )}
                 </TableBody>
               </Table>
-            </div>
-
             <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
                 Showing {paginatedProjects.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}-

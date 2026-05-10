@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, ChevronRight, ChevronsUpDown, CircleDot, CreditCard, FolderKanban, FolderOpenDot, Gauge, History, KanbanSquare, LogOut, Plus, Settings, ShieldAlert, UserCircle2, Users } from "lucide-react";
+import { Bell, ChevronRight, ChevronsUpDown, CircleDot, CreditCard, FolderKanban, FolderOpenDot, Gauge, History, KanbanSquare, LogOut, PencilLine, Plus, Settings, ShieldAlert, UserCircle2, Users } from "lucide-react";
 
 import { NotificationDropdown } from "@/components/shared/navigation/notification-dropdown";
 import { ThemeToggle } from "@/components/shared/theme/theme-toggle";
@@ -46,11 +46,12 @@ const navigation = [
   { id: "overview", label: "Overview", href: "/", icon: Gauge },
   { id: "issues", label: "All Issues", href: "/issues", icon: CircleDot, badge: "34" },
   { id: "kanban", label: "Kanban", href: "/kanban", icon: KanbanSquare },
-  { id: "triage", label: "Triage Queue", href: "/", icon: ShieldAlert, badge: "7" },
+  // { id: "triage", label: "Triage Queue", href: "/", icon: ShieldAlert, badge: "7" },
   { id: "teams", label: "Teams", href: "/teams", icon: Users },
   { id: "projects", label: "Projects", href: "/projects", icon: FolderOpenDot },
   { id: "changelog", label: "Changelog", href: "/changelog", icon: History },
   { id: "settings", label: "Settings", href: "/settings/menu", icon: Settings },
+  { id: "audit-trail", label: "Audit Trail", href: "/audit-trail", icon: PencilLine },
 ] as const;
 
 export function AppShell({
