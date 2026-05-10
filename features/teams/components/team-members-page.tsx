@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowLeft, Pencil, Save, UserPlus } from "lucide-react";
+import { ArrowLeft, Edit, Edit2, Pencil, Save, UserPlus } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -226,7 +226,7 @@ export function TeamMembersPage({ id }: { id: string }) {
                       <TableCell>{member.isActive ? "Yes" : "No"}</TableCell>
                       <TableCell>
                         <Button onClick={() => handleEdit(member)} variant="outline" size="icon-sm">
-                          <Pencil />
+                          <Edit />
                         </Button>
                       </TableCell>
                     </TableRow>

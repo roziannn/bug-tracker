@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Edit2, Plus, Save, Users } from "lucide-react";
+import { ArrowLeft, Edit, Edit2, Plus, Save, Users } from "lucide-react";
 import { useState } from "react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +33,7 @@ export function TeamGroupsPage() {
   const [groupLead, setGroupLead] = useState("");
   const [domain, setDomain] = useState<(typeof domainOptions)[number]>("engineering");
   const [isActive, setIsActive] = useState<"active" | "inactive">("active");
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [groups, setGroups] = useState<GroupTeamRecord[]>(() =>
     teamMetrics.map((team, index) => ({
       id: team.id,
@@ -48,12 +50,13 @@ export function TeamGroupsPage() {
   const isEditing = editingGroupId !== null;
 
   function resetForm() {
-    setEditingGroupId(null);
-    setGroupName("");
-    setGroupLead("");
-    setDomain("engineering");
-    setIsActive("active");
-  }
+  setEditingGroupId(null);
+  setGroupName("");
+  setGroupLead("");
+  setDomain("engineering");
+  setIsActive("active");
+  setIsGroupModalOpen(false);
+}
 
   function handleSubmit() {
     if (!groupName.trim() || !groupLead.trim()) {
@@ -95,12 +98,13 @@ export function TeamGroupsPage() {
   }
 
   function handleEdit(group: GroupTeamRecord) {
-    setEditingGroupId(group.id);
-    setGroupName(group.name);
-    setGroupLead(group.lead);
-    setDomain(group.domain);
-    setIsActive(group.isActive);
-  }
+  setEditingGroupId(group.id);
+  setGroupName(group.name);
+  setGroupLead(group.lead);
+  setDomain(group.domain);
+  setIsActive(group.isActive);
+  setIsGroupModalOpen(true);
+}
 
   return (
     <AppShell
@@ -112,76 +116,31 @@ export function TeamGroupsPage() {
       eyebrow="People & ownership"
       title="Manage Group Teams"
       toolbar={
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 className="text-lg font-semibold tracking-tight">Group team maintenance</h2>
           <p className="text-sm text-muted-foreground">
             Buat, atur, dan review group team yang dipakai untuk ownership dan routing issue.
           </p>
         </div>
-      }
+         <div className="flex flex-col gap-2 sm:flex-row">
+          <Button nativeButton={false} render={<Link href="/teams" />} variant="outline">
+            <ArrowLeft/>  Back to teams
+          </Button>
+          <Button
+            onClick={() => {
+              resetForm();
+              setIsGroupModalOpen(true);
+            }}
+          >
+            <Plus />
+            Create group
+          </Button>
+        </div>
+      </div>
+    }
     >
-      <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
-        <Card>
-          <CardHeader>
-            <CardTitle>{isEditing ? "Edit group team" : "Create group team"}</CardTitle>
-            <CardDescription>
-              {isEditing
-                ? "Update group team untuk struktur squad atau domain ownership yang berbeda."
-                : "Tambahkan group team baru untuk struktur squad atau domain ownership yang berbeda."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="team-name">Group name</Label>
-              <Input id="team-name" value={groupName} onChange={(event) => setGroupName(event.target.value)} placeholder="Contoh: Mobile Platform" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="team-lead">Lead</Label>
-              <Input id="team-lead" value={groupLead} onChange={(event) => setGroupLead(event.target.value)} placeholder="Contoh: Andi Pratama" />
-            </div>
-            <div className="grid gap-2">
-              <Label>Domain</Label>
-              <Select value={domain} onValueChange={(value) => setDomain(value as (typeof domainOptions)[number])}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {domainOptions.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option === "engineering" ? "Engineering" : option === "platform" ? "Platform" : "Operations"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {isEditing ? (
-              <div className="grid gap-2">
-                <Label>Is active</Label>
-                <Select value={isActive} onValueChange={(value) => setIsActive(value as "active" | "inactive")}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : null}
-            <div className="flex gap-2">
-              <Button onClick={handleSubmit}>
-                {isEditing ? <Save /> : <Plus />}
-                {isEditing ? "Save group" : "Create group"}
-              </Button>
-              {isEditing ? (
-                <Button onClick={resetForm} variant="outline">
-                  Cancel
-                </Button>
-              ) : null}
-            </div>
-          </CardContent>
-        </Card>
-
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Existing group teams</CardTitle>
@@ -199,14 +158,13 @@ export function TeamGroupsPage() {
                       <Badge variant="outline">{team.members} members</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Lead: {team.lead} · Domain: {team.domain} · SLA: {team.sla} · Open issues: {team.activeIssues}
+                      Lead: {team.lead} · Domain: {team.domain} · SLA: {team.sla} · Status: {team.isActive === "active" ? "Active" : "Inactive"}
                     </p>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <Button onClick={() => handleEdit(team)} variant="outline" size="sm">
-                      <Edit2 />
-                      Edit group
+                    <Button onClick={() => handleEdit(team)} variant="outline">
+                      <Edit />
                     </Button>
                     <Button
                       nativeButton={false}
@@ -221,6 +179,81 @@ export function TeamGroupsPage() {
             ))}
           </CardContent>
         </Card>
+        <Dialog open={isGroupModalOpen} onOpenChange={setIsGroupModalOpen}>
+          <DialogContent className="sm:max-w-[520px]">
+            <DialogHeader>
+              <DialogTitle>{isEditing ? "Edit group team" : "Create group team"}</DialogTitle>
+              <DialogDescription>
+                {isEditing
+                  ? "Update group team untuk struktur squad atau domain ownership yang berbeda."
+                  : "Tambahkan group team baru untuk struktur squad atau domain ownership yang berbeda."}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="team-name">Group name</Label>
+                <Input
+                  id="team-name"
+                  value={groupName}
+                  onChange={(event) => setGroupName(event.target.value)}
+                  placeholder="Contoh: Mobile Platform"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="team-lead">Lead</Label>
+                <Input
+                  id="team-lead"
+                  value={groupLead}
+                  onChange={(event) => setGroupLead(event.target.value)}
+                  placeholder="Contoh: Andi Pratama"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Domain</Label>
+                <Select value={domain} onValueChange={(value) => setDomain(value as (typeof domainOptions)[number])}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {domainOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option === "engineering" ? "Engineering" : option === "platform" ? "Platform" : "Operations"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {isEditing ? (
+                <div className="grid gap-2">
+                  <Label>Is active</Label>
+                  <Select value={isActive} onValueChange={(value) => setIsActive(value as "active" | "inactive")}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : null}
+
+              <div className="flex justify-end gap-2">
+                <Button onClick={resetForm} variant="outline">
+                  Cancel
+                </Button>
+                <Button onClick={handleSubmit}>
+                  {isEditing ? <Save /> : <Plus />}
+                  {isEditing ? "Save group" : "Create group"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppShell>
   );
