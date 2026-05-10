@@ -53,12 +53,12 @@ export type TeamMetric = {
   id: string;
   name: string;
   lead: string;
+  domain: string; 
   members: number;
   activeIssues: number;
   criticalOpen: number;
   sla: string;
 };
-
 export type ProjectMetric = {
   id: string;
   name: string;
@@ -284,11 +284,13 @@ const assigneeNameMap: Record<string, string> = {
   AR: "Aulia Rahman",
 };
 
+
 export const teamMetrics: TeamMetric[] = [
   {
     id: "frontend",
     name: "Frontend",
     lead: "Raka Aditya",
+    domain: "User Experience & UI", // Tambahkan domain
     members: 8,
     activeIssues: 4,
     criticalOpen: 1,
@@ -298,6 +300,7 @@ export const teamMetrics: TeamMetric[] = [
     id: "platform",
     name: "Platform",
     lead: "Mira Indah",
+    domain: "Infrastructure & DevOps", // Tambahkan domain
     members: 6,
     activeIssues: 4,
     criticalOpen: 0,
@@ -307,6 +310,7 @@ export const teamMetrics: TeamMetric[] = [
     id: "core",
     name: "Core",
     lead: "Dina Nanda",
+    domain: "Backend & Architecture", // Tambahkan domain
     members: 7,
     activeIssues: 4,
     criticalOpen: 1,

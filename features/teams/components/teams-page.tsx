@@ -2,23 +2,16 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Settings2, UserPlus } from "lucide-react";
-
+import { Settings2, UserPlus, Layout, Server, Cpu, Layers } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
-import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TablePagination } from "@/components/ui/table-pagination";
-import { issues, picOptions, priorityVariant, teamMetrics } from "@/features/bug-tracker/data/bug-tracker-data";
+import { issues, priorityVariant, teamMetrics } from "@/features/bug-tracker/data/bug-tracker-data";
 
-const PAGE_SIZE = 4;
-
-const picDirectoryByTeam = teamMetrics.map((team) => ({
-  team: team.name,
-  members: picOptions.filter((person) => person.team === team.name),
-}));
+const PAGE_SIZE = 5;
 
 export function TeamsPage() {
   const [page, setPage] = useState(1);
@@ -52,83 +45,83 @@ export function TeamsPage() {
       }
     >
       <div className="space-y-6">
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-          <Card>
-            <CardHeader>
-              <CardTitle>Team capacity</CardTitle>
-              <CardDescription>Ringkasan squad, lead, SLA, issue aktif, dan akses cepat untuk tambah member ke team.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Team</TableHead>
-                    <TableHead>Lead</TableHead>
-                    <TableHead>Members</TableHead>
-                    <TableHead>Open issues</TableHead>
-                    <TableHead>Critical</TableHead>
-                    <TableHead>SLA</TableHead>
-                    <TableHead>Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedTeams.map((team) => (
-                    <TableRow key={team.id}>
-                      <TableCell className="font-medium">{team.name}</TableCell>
-                      <TableCell>{team.lead}</TableCell>
-                      <TableCell>{team.members}</TableCell>
-                      <TableCell>{team.activeIssues}</TableCell>
-                      <TableCell>
-                        <Badge variant={team.criticalOpen > 0 ? "destructive" : "secondary"}>{team.criticalOpen}</Badge>
-                      </TableCell>
-                      <TableCell>{team.sla}</TableCell>
-                      <TableCell>
-                        <Button nativeButton={false} render={<Link href={`/teams/${team.id}/members`} />} size="sm" variant="outline">
-                          <UserPlus />
-                          Add member
-                        </Button>
-                      </TableCell>
+        <Card>
+          <CardHeader>
+            <CardTitle>Team capacity</CardTitle>
+            <CardDescription>Ringkasan squad, lead, SLA, distribusi tingkat keparahan issue, dan total beban kerja.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+           
+                <Table className="min-w-[1100px]">
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent border-b">
+                      <TableHead>Team</TableHead>
+                      <TableHead>Lead</TableHead>
+                      <TableHead>Domain</TableHead>
+                      <TableHead>Members</TableHead>
+                      <TableHead>Total Issues</TableHead>
+                      <TableHead>High</TableHead>
+                      <TableHead>Critical</TableHead>
+                      <TableHead>SLA</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-              <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Showing {paginatedTeams.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}-{Math.min(currentPage * PAGE_SIZE, teamMetrics.length)} of {teamMetrics.length} teams
-                </p>
-                <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setPage} />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>PIC directory</CardTitle>
-              <CardDescription>Kandidat owner awal issue berdasarkan squad dan distribusi task yang ada.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {picDirectoryByTeam.map((group) => {
-                return (
-                  <div key={group.team} className="grid gap-2 rounded-xl border px-3 py-3 md:grid-cols-[88px_minmax(0,1fr)] md:items-start">
-                    <div className="pt-0.5">
-                      <p className="text-sm font-semibold">{group.team}</p>
-                    </div>
-
-                    <div className="text-sm leading-6 text-muted-foreground">
-                      {group.members.map((person, index) => (
-                        <span key={person.value}>
-                          <span className="font-medium text-foreground">{person.label}</span>
-                          {index < group.members.length - 1 ? ", " : ""}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
-        </div>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedTeams.map((team, index) => {
+                      const teamIssues = issues.filter((i) => i.team === team.name);
+                      const highIssues = teamIssues.filter((i) => i.priority === "High").length;
+                      const isLast = index === paginatedTeams.length - 1;
+                      return (
+                        <TableRow 
+                          key={team.id} 
+                          className={isLast ? "border-0" : "border-b"}
+                        >
+                          <TableCell className="font-semibold">{team.name}</TableCell>
+                          <TableCell>{team.lead}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="bg-muted/50 font-normal text-sm border-none">
+                              {team.domain}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{team.members} members</TableCell>
+                          <TableCell>
+                            <span className="font-mono">{teamIssues.length}</span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant="secondary" 
+                              className={highIssues > 0 ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-none" : "border-none"}
+                            >
+                              {highIssues}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={team.criticalOpen > 0 ? "destructive" : "secondary"} className="border-none">
+                              {team.criticalOpen}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="whitespace-nowrap font-medium text-emerald-600 dark:text-emerald-400">
+                            {team.sla}
+                          </TableCell>
+                          <TableCell>
+                            <Button nativeButton={false} render={<Link href={`/teams/${team.id}/members`} />} size="sm" variant="outline">
+                              <UserPlus className="mr-2 size-4" />
+                              Add member
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+            <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Showing {paginatedTeams.length ? (currentPage - 1) * PAGE_SIZE + 1 : 0}-{Math.min(currentPage * PAGE_SIZE, teamMetrics.length)} of {teamMetrics.length} teams
+              </p>
+              <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setPage} />
+            </div>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
@@ -138,42 +131,40 @@ export function TeamsPage() {
           <CardContent className="grid gap-4 lg:grid-cols-3">
             {teamMetrics.map((team) => {
               const teamIssues = issues.filter((issue) => issue.team === team.name);
-
               return (
-                <div key={team.id} className="rounded-xl border p-4">
+                <div key={team.id} className="rounded-xl border p-4 hover:border-primary/50 transition-colors">
                   <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="font-medium">{team.name}</p>
-                      <p className="text-sm text-muted-foreground">{teamIssues.length} tracked issues</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      {team.name === "Frontend" && <Layout className="size-5" />}
+                      {team.name === "Platform" && <Server className="size-5" />}
+                      {team.name === "Core" && <Cpu className="size-5" />}
+                      {!["Frontend", "Platform", "Core"].includes(team.name) && <Layers className="size-5" />}
                     </div>
-                    <AvatarGroup>
-                      {picOptions
-                        .filter((person) => person.team === team.name)
-                        .slice(0, 3)
-                        .map((person) => (
-                          <Avatar key={person.value} size="sm">
-                            <AvatarFallback>
-                              {person.label
-                                .split(" ")
-                                .slice(0, 2)
-                                .map((part) => part[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                        ))}
-                    </AvatarGroup>
+                    <div className="min-w-0">
+                      <p className="font-semibold leading-none">{team.name}</p>
+                      <p className="mt-1.5 text-xs text-muted-foreground whitespace-nowrap">
+                        {teamIssues.length} tracked issues
+                      </p>
+                    </div>
                   </div>
-
+                </div>
                   <div className="mt-4 space-y-3">
-                    {teamIssues.slice(0, 3).map((issue) => (
-                      <div key={issue.id} className="rounded-lg bg-muted/30 p-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-medium">{issue.id}</p>
-                          <Badge variant={priorityVariant(issue.priority)}>{issue.priority}</Badge>
+                    {teamIssues.length > 0 ? (
+                      teamIssues.slice(0, 3).map((issue) => (
+                        <div key={issue.id} className="rounded-lg bg-muted/30 p-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-mono font-medium">{issue.id}</p>
+                            <Badge variant={priorityVariant(issue.priority)} className="scale-75 origin-right">{issue.priority}</Badge>
+                          </div>
+                          <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">{issue.title}</p>
                         </div>
-                        <p className="mt-1 text-sm text-muted-foreground">{issue.title}</p>
+                      ))
+                    ) : (
+                      <div className="flex h-[180px] items-center justify-center rounded-lg border border-dashed text-xs text-muted-foreground">
+                        No active issues
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               );
