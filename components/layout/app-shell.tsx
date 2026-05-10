@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, CircleDot, ChevronsUpDown, FolderKanban, FolderOpenDot, Gauge, History, KanbanSquare, LogOut, Plus, Settings, ShieldAlert, UserCircle2, Users } from "lucide-react";
+import { Bell, ChevronRight, ChevronsUpDown, CircleDot, CreditCard, FolderKanban, FolderOpenDot, Gauge, History, KanbanSquare, LogOut, Plus, Settings, ShieldAlert, UserCircle2, Users } from "lucide-react";
 
 import { NotificationDropdown } from "@/components/shared/navigation/notification-dropdown";
 import { ThemeToggle } from "@/components/shared/theme/theme-toggle";
@@ -75,17 +75,19 @@ export function AppShell({
   return (
     <SidebarProvider defaultOpen>
       <Sidebar collapsible="icon" variant="inset">
-        <SidebarHeader className="gap-3 p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
-          <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/50 px-3 py-3 transition-all group-data-[collapsible=icon]:size-14 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-2xl group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground transition-all group-data-[collapsible=icon]:size-9">
-              <FolderKanban className="size-5" />
-            </div>
-            <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-              <p className="truncate text-sm font-semibold">Bug Tracker</p>
-              <p className="truncate text-xs text-sidebar-foreground/70">Engineering workspace</p>
-            </div>
-          </div>
-        </SidebarHeader>
+       <SidebarHeader className="gap-3 p-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2">
+  <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/50 px-3 py-3 transition-all group-data-[collapsible=icon]:size-14 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-2xl group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:border-transparent">
+    
+    <div className="flex size-10 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground transition-all group-data-[collapsible=icon]:size-9">
+      <FolderKanban className="size-5" />
+    </div>
+
+    <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+      <p className="truncate text-sm font-semibold">Bug Tracker</p>
+      <p className="truncate text-xs text-sidebar-foreground/70">Engineering workspace</p>
+    </div>
+  </div>
+</SidebarHeader>
 
         <SidebarContent>
           <SidebarGroup>
@@ -114,8 +116,8 @@ export function AppShell({
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <button className="flex w-full items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/60 px-3 py-3 text-left transition-all hover:bg-sidebar-accent group-data-[collapsible=icon]:size-14 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-2xl group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0">
-                  <Avatar>
+                <button className="flex w-full items-center gap-3 rounded-xl border border-sidebar-border bg-sidebar-accent/60 px-3 py-2.5 text-left transition-all hover:bg-sidebar-accent group-data-[collapsible=icon]:size-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-full group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0 group-data-[collapsible=icon]:hover:bg-transparent">
+                  <Avatar data-size="lg">
                     <AvatarFallback>RA</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
@@ -126,19 +128,33 @@ export function AppShell({
                 </button>
               }
             />
-            <DropdownMenuContent align="end" className="w-56" side="top" sideOffset={8}>
-              <div className="px-2 py-1.5">
-                <p className="text-sm font-medium text-foreground">Raka Aditya</p>
-                <p className="text-xs text-muted-foreground">raka@bugtracker.app</p>
+            <DropdownMenuContent align="end" className="w-72 rounded-xl p-0" side="top" sideOffset={8}>
+              <div className="flex items-center gap-3 px-3 py-3">
+                <Avatar data-size="lg">
+                  <AvatarFallback>RA</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-foreground">Raka Aditya</p>
+                  <p className="truncate text-xs text-muted-foreground">raka@bugtracker.app</p>
+                </div>
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem render={<Link href="/profile" />}>
                 <UserCircle2 />
-                Profile
+                Account
               </DropdownMenuItem>
+              <DropdownMenuItem>
+                <CreditCard />
+                Billing
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Bell />
+                Notifications
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} variant="destructive">
                 <LogOut />
-                Logout
+                Log out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

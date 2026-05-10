@@ -3,7 +3,7 @@
 import type { FormEvent } from "react";
 import { useEffect, useId, useState } from "react";
 import Link from "next/link";
-import { FileUp, ShieldAlert, Trash2 } from "lucide-react";
+import { FileUp, Save, SendHorizonal, ShieldAlert, Trash2, X } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
@@ -49,8 +49,18 @@ function formatFileSize(size: number) {
 
 export function CreateIssuePage() {
   const uploadId = useId();
+  const formId = useId();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [selectedEvidence, setSelectedEvidence] = useState<EvidenceUpload[]>([]);
   const hasUploadingEvidence = selectedEvidence.some((file) => file.status === "uploading");
+  const hasCompletedEvidence = selectedEvidence.some((file) => file.status === "done");
+  const missingRequiredFields = [
+    !title.trim() ? "title" : null,
+    !description.trim() ? "description" : null,
+    !hasCompletedEvidence ? "evidence" : null,
+  ].filter((field): field is string => Boolean(field));
+  const isFormComplete = missingRequiredFields.length === 0;
 
   useEffect(() => {
     const hasUploadingFile = selectedEvidence.some((file) => file.status === "uploading");
@@ -98,9 +108,17 @@ export function CreateIssuePage() {
       return;
     }
 
+    if (!isFormComplete) {
+      appToast.error({
+        title: "Form belum lengkap",
+        description: `Lengkapi field wajib terlebih dahulu: ${missingRequiredFields.join(", ")}.`,
+      });
+      return;
+    }
+
     appToast.success({
       title: "Issue siap disubmit",
-      description: "Semua evidence sudah selesai di-upload dan form bisa diproses.",
+      description: "Field wajib sudah lengkap dan semua evidence selesai di-upload.",
     });
   }
 
@@ -140,18 +158,24 @@ export function CreateIssuePage() {
           </CardHeader>
 
           <CardContent>
-            <form className="grid gap-6" onSubmit={handleSubmitIssue}>
+            <form id={formId} className="grid gap-6" onSubmit={handleSubmitIssue}>
               <div className="grid gap-2">
-                <Label htmlFor="issue-title">Title</Label>
+                <Label htmlFor="issue-title">
+                  Title <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="issue-title"
                   placeholder="Contoh: Attachment upload gagal saat file evidence lebih dari 10 MB"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
                 />
               </div>
 
               <div className="grid gap-2">
                 <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor={uploadId}>Upload evidence</Label>
+                  <Label htmlFor={uploadId}>
+                    Upload evidence <span className="text-destructive">*</span>
+                  </Label>
                   <span className="text-xs text-muted-foreground">
                     PNG, JPG, PDF, atau video pendek
                   </span>
@@ -239,17 +263,23 @@ export function CreateIssuePage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="issue-description">Description</Label>
+                <Label htmlFor="issue-description">
+                  Description <span className="text-destructive">*</span>
+                </Label>
                 <Textarea
                   id="issue-description"
                   placeholder="Jelaskan langkah reproduksi, hasil yang diharapkan, hasil aktual, environment, dan dampak ke user."
                   rows={8}
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
                 />
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="grid gap-2">
-                  <Label>Issue classification</Label>
+                  <Label>
+                    Issue classification <span className="text-destructive">*</span>
+                  </Label>
                   <Select defaultValue="Functional">
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Pilih klasifikasi issue" />
@@ -265,7 +295,9 @@ export function CreateIssuePage() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label>Criticality tier</Label>
+                  <Label>
+                    Criticality tier <span className="text-destructive">*</span>
+                  </Label>
                   <Select defaultValue="Tier 2 - Major">
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Pilih criticality tier" />
@@ -283,14 +315,16 @@ export function CreateIssuePage() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="grid gap-2">
-                  <Label>PIC</Label>
-                  <Select defaultValue={picOptions[0]?.value}>
+                  <Label>
+                    PIC <span className="text-destructive">*</span>
+                  </Label>
+                  <Select defaultValue={picOptions[0]?.label}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Pilih PIC" />
                     </SelectTrigger>
                     <SelectContent>
                       {picOptions.map((person) => (
-                        <SelectItem key={person.value} value={person.value}>
+                        <SelectItem key={person.value} value={person.label}>
                           {person.label} - {person.team}
                         </SelectItem>
                       ))}
@@ -299,7 +333,9 @@ export function CreateIssuePage() {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label>Project</Label>
+                  <Label>
+                    Project <span className="text-destructive">*</span>
+                  </Label>
                   <Select defaultValue={projectOptions[0]?.value}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Pilih project" />
@@ -314,28 +350,35 @@ export function CreateIssuePage() {
                   </Select>
                 </div>
               </div>
-              <div className="flex items-center justify-end gap-2 border-t pt-6">
-                <Button variant="outline" type="button">Save draft</Button>
-                <Button disabled={hasUploadingEvidence} type="submit">Submit issue</Button>
-              </div>
             </form>
           </CardContent>
 
-          <CardFooter className="justify-between gap-3">
+          <CardFooter className="flex items-center justify-between gap-3 border-t">
             <Button
               nativeButton={false}
-              render={<Link href="/issues">Cancel</Link>}
+              render={
+                <Link href="/issues">
+                  <X />
+                  Cancel
+                </Link>
+              }
               variant="outline"
             />
             {hasUploadingEvidence ? (
               <p className="text-sm text-muted-foreground">
                 Submit akan aktif setelah semua evidence selesai upload.
               </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Semua evidence sudah siap untuk disubmit.
-              </p>
-            )}
+            ) : null}
+            <div className="flex items-center gap-2">
+              <Button variant="outline" type="button">
+                <Save />
+                Save draft
+              </Button>
+              <Button disabled={hasUploadingEvidence || !isFormComplete} form={formId} type="submit">
+                <SendHorizonal />
+                Submit issue
+              </Button>
+            </div>
           </CardFooter>
         </Card>
 

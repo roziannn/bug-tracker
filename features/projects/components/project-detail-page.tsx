@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Activity, CalendarDays, Flag, Hash, Link2, Server, ShieldAlert, UserRound, Users } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
@@ -70,7 +71,7 @@ export function ProjectDetailPage({ id }: { id: string }) {
         </div>
       }
     >
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -78,33 +79,56 @@ export function ProjectDetailPage({ id }: { id: string }) {
                 <CardTitle>{project.name}</CardTitle>
                 <CardDescription>{project.description}</CardDescription>
               </div>
-              <Badge variant={projectStatusVariant(project.status)}>{project.status}</Badge>
+              <Badge variant={projectStatusVariant(project.status)}>
+                <Activity className="size-3.5" />
+                {project.status}
+              </Badge>
             </div>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-xl border p-4">
-              <p className="text-xs text-muted-foreground">Project ID</p>
-              <p className="mt-1 break-all font-mono text-sm">{project.id}</p>
+          <CardContent className="grid gap-x-6 gap-y-5 pt-0 text-sm md:grid-cols-2 xl:grid-cols-3">
+            <div className="space-y-1">
+              <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <Hash className="size-4" />
+                Project ID
+              </p>
+              <Badge className="max-w-full justify-start break-all font-mono" variant="outline">
+                {project.id}
+              </Badge>
             </div>
-            <div className="rounded-xl border p-4">
-              <p className="text-xs text-muted-foreground">Owner</p>
-              <p className="mt-1 font-medium">{project.owner}</p>
+            <div className="space-y-1">
+              <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <UserRound className="size-4" />
+                Owner
+              </p>
+              <p className="font-medium">{project.owner}</p>
             </div>
-            <div className="rounded-xl border p-4">
-              <p className="text-xs text-muted-foreground">Team</p>
-              <p className="mt-1 font-medium">{project.team}</p>
+            <div className="space-y-1">
+              <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <Users className="size-4" />
+                Team
+              </p>
+              <p className="font-medium">{project.team}</p>
             </div>
-            <div className="rounded-xl border p-4">
-              <p className="text-xs text-muted-foreground">Environment</p>
-              <p className="mt-1 font-medium">{project.environment}</p>
+            <div className="space-y-1">
+              <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <Server className="size-4" />
+                Environment
+              </p>
+              <p className="font-medium">{project.environment}</p>
             </div>
-            <div className="rounded-xl border p-4">
-              <p className="text-xs text-muted-foreground">Repository</p>
-              <p className="mt-1 break-all text-sm">{project.repository}</p>
+            <div className="space-y-1">
+              <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <Link2 className="size-4" />
+                Repository
+              </p>
+              <p className="break-all font-medium">{project.repository}</p>
             </div>
-            <div className="rounded-xl border p-4">
-              <p className="text-xs text-muted-foreground">Created at</p>
-              <p className="mt-1 font-medium">{project.createdAt}</p>
+            <div className="space-y-1">
+              <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <CalendarDays className="size-4" />
+                Created at
+              </p>
+              <p className="font-medium">{project.createdAt}</p>
             </div>
           </CardContent>
         </Card>
@@ -116,15 +140,24 @@ export function ProjectDetailPage({ id }: { id: string }) {
             </CardHeader>
             <CardContent className="grid gap-3">
               <div className="rounded-xl bg-muted/30 p-4">
-                <p className="text-xs text-muted-foreground">Open issues</p>
+                <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                  <ShieldAlert className="size-4" />
+                  Open issues
+                </p>
                 <p className="mt-1 text-3xl font-semibold">{project.openIssues}</p>
               </div>
               <div className="rounded-xl bg-muted/30 p-4">
-                <p className="text-xs text-muted-foreground">Critical issues</p>
+                <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                  <ShieldAlert className="size-4" />
+                  Critical issues
+                </p>
                 <p className="mt-1 text-3xl font-semibold">{project.criticalIssues}</p>
               </div>
               <div className="rounded-xl bg-muted/30 p-4">
-                <p className="text-xs text-muted-foreground">Next milestone</p>
+                <p className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                  <Flag className="size-4" />
+                  Next milestone
+                </p>
                 <p className="mt-1 font-medium">{project.nextMilestone}</p>
               </div>
             </CardContent>

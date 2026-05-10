@@ -270,6 +270,20 @@ export const picOptions: PicOption[] = [
   { value: "lm", label: "Laras Mahesa", team: "Core" },
 ];
 
+const assigneeNameMap: Record<string, string> = {
+  RA: "Raka Aditya",
+  MI: "Mira Indah",
+  AL: "Alif Latif",
+  DN: "Dina Nanda",
+  NV: "Nadia Valencia",
+  KT: "Kevin Tan",
+  SW: "Satria Wibowo",
+  PR: "Putri Ramadhani",
+  LM: "Laras Mahesa",
+  CY: "Cahya Yusuf",
+  AR: "Aulia Rahman",
+};
+
 export const teamMetrics: TeamMetric[] = [
   {
     id: "frontend",
@@ -402,6 +416,10 @@ export function getProjectById(id: string) {
 
 export function getIssueById(id: string) {
   return issues.find((issue) => issue.id === id);
+}
+
+export function getAssigneeName(assignee: string) {
+  return assigneeNameMap[assignee] ?? assignee;
 }
 
 export function getRelativeTime(dateString: string) {
